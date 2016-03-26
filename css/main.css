@@ -9,7 +9,7 @@ body{
   height: 100%;
 }
 
-#header, #main-disp, #footer {
+#header, #main-disp, #footer, #main-disp-window {
   width:0px;
   height: 1px;
   text-align: center;
@@ -25,8 +25,6 @@ body{
   left: 0px;
   top: 0px;
   margin: 2px 2px 2px 2px;
-  background: #ddd;
-  color: #000;
 }
 
 #main-disp {
@@ -44,6 +42,14 @@ body{
   top: 556px;
   left: 0px;
   margin: 0px 2px 2px 2px;
-  background: #ddd;
-  color: #000;
+}
+
+#main-disp-window {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: -200px 0 0 -200px;
+  background: #000;
+  color: #ddd;
+  border: 2px #ddd solid;
 }
