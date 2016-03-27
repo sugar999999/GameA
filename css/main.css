@@ -53,3 +53,40 @@ body{
   color: #ddd;
   border: 2px #ddd solid;
 }
+
+#nav {
+  position: absolute;
+  top: 50px;
+  left: -260px;
+  bottom: 0px;
+  width: 270px;
+  height: auto;
+  color: #ddd;
+  background: #444;
+  border-radius: 5px;
+  z-index: 1;
+  text-indent: 1em;
+  line-height: 3em;
+}
+
+#nav:hover{
+  left: 0px;
+}
+
+#output-map {
+  width:80px;
+  height:80px;
+  margin: 10 10 10 10;
+  line-height: 80px;
+  text-align: center;
+  font-size: 2em;
+  border: 1px #fff double;
+  background: #ddd;
+  color: #000;
+  text-indent: 0;
+}
+
+#output-map:hover{
+  cursor: pointer;
+  background: #ccc;
+}
