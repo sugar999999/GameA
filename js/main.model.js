@@ -51,8 +51,12 @@ main.model = (function(){
       rad: 0
     },
     ball_state: {
-      X: 0,
-      Y: 0,
+      X: this.radius,
+      Y: this.radius,
+      col: 0,
+      row: 0,
+      _col: -1,
+      _row: -1,
       gravity: 5,
       vx: 0,
       vy: 0,
@@ -67,14 +71,47 @@ main.model = (function(){
   // --------------------updateStatus----------------------start
   //
   updateStatus = function(){
+
+    // ボールの現在位置ブロックを算出
+    configMap.ball_state.col = Math.floor(configMap.ball_state.X / configMap.block_size);
+    configMap.ball_state.row = Math.floor(configMap.ball_state.Y / configMap.block_size);
+
+    // ボールの位置更新
+    // 下向きの重力に合わせてsin,cosを設定。（ball_state.X: gravity（下向き） の sin, ball_state.Y: gravity（下向き） の cos）
     configMap.ball_state.vx += Math.sin(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity;
+    configMap.ball_state.vy += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity;
+    // 「mainCanvas」からスケールアウトしないように値を調整。
     if(configMap.ball_state.vx < configMap.ball_state.radius)configMap.ball_state.vx = configMap.ball_state.radius;
     else if(configMap.ball_state.vx > mainCanvas.width - configMap.ball_state.radius)configMap.ball_state.vx = mainCanvas.width - configMap.ball_state.radius;
-    configMap.ball_state.vy += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity;
     if(configMap.ball_state.vy < configMap.ball_state.radius)configMap.ball_state.vy = configMap.ball_state.radius;
     else if(configMap.ball_state.vy > mainCanvas.height - configMap.ball_state.radius)configMap.ball_state.vy = mainCanvas.height - configMap.ball_state.radius;
+
+    // ブロックを通過しない判定
+    // ボール先端（ボールのX,Y＋半径）の「Col」「Row」を算出
+    configMap.ball_state._col = Math.floor((configMap.ball_state.vx + configMap.ball_state.radius) / configMap.block_size);
+    configMap.ball_state._row = Math.floor((configMap.ball_state.vy + configMap.ball_state.radius) / configMap.block_size);
+    // ボール先端にブロックがあるかどうか判定
+    if( (configMap.ball_state._col < configMap.stage_map[0].length ) && (configMap.ball_state._row < configMap.stage_map.length) ){
+      if(configMap.ball_state._col != configMap.ball_state.col){
+        if(configMap.stage_map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+          configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
+          configMap.ball_state.vx -= configMap.ball_state.radius;
+        }
+      }
+      if(configMap.ball_state._row != configMap.ball_state.row){
+        if(configMap.stage_map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+          configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
+          configMap.ball_state.vy -= configMap.ball_state.radius;
+        }
+      }
+    }
+
+
+    // ボールの位置を移動
     configMap.ball_state.X = configMap.ball_state.vx;
     configMap.ball_state.Y = configMap.ball_state.vy;
+
+
   };
 
   //
