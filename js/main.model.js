@@ -11,6 +11,7 @@ main.model = (function(){
       + '<div id=\"header\">Game<\/div>'
       + '<div id=\"main-disp\">Main'
         + '<canvas id=\"main-disp-window\"><\/canvas>'
+        + '<input type=\"range\" id=\"rad-range\" max=\"90\" min=\"-90\" value=\"0\"></input>'
       + '<\/div>'
       + '<div id=\"footer\">Footer<\/div>'
       + '<div id=\"nav\">Nav'
@@ -45,10 +46,13 @@ main.model = (function(){
       _col: -1,
       _row: -1,
       swit: 0
+    },
+    disp_state: {
+      rad: 0
     }
   },
-  initModule, drawWindow, nav, onMouseMove, onMouseClick,
-  mainCanvas, style, mainCont;
+  initModule, drawDisp, nav, onMouseMove, onMouseClick,
+  mainCanvas, style, mainCont, onRadChange;
   //
   // ------------------difine---------------------end
 
@@ -89,9 +93,9 @@ main.model = (function(){
   //
   // --------------------nav----------------------end
 
-  // ------------------------drawWindow--------------------------start
+  // ------------------------drawDisp--------------------------start
   //
-  drawWindow = function(){
+  drawDisp = function(){
     // ---------------canvas px adapt------------------start
     style = window.getComputedStyle(mainCanvas);
     mainCanvas.width = +style.width.replace(/px/, "");
@@ -108,7 +112,16 @@ main.model = (function(){
   };
 
   //
-  // ------------------------drawWindow--------------------------end
+  // ------------------------drawDisp--------------------------end
+
+  // --------------------onRadChange----------------------start
+  //
+    onRadChange = function(e){
+      configMap.disp_state.rad = $(this).val();
+      $("#main-disp-window").css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
+    };
+  //
+  // --------------------onRadChange----------------------start
 
   // --------------------onMouseMoveCanvas----------------------start
   //
@@ -122,30 +135,32 @@ main.model = (function(){
     configMap.mouse.row = Math.floor(configMap.mouse.Y / configMap.block_size);
 
     if( (configMap.mouse.col < configMap.stage_map[0].length) && (configMap.mouse.row < configMap.stage_map.length) ){
-    // 取得した現在位置ブロックの状態に応じて、クリック時の動作を判定する。
-    // 空白：ブロックを埋める。
-    // 空白でない：ブロックを消す。
-    // 例外：クリックされたまま他のブロックに移った場合、最初のブロック状態の判定から変更しない。
-    //  * configMap.mouse.swit：クリック時の動作。「0」消す。「1」埋める。
-    //
-    if(e.buttons === 0 && configMap.stage_map[configMap.mouse.row][configMap.mouse.col] === 0)configMap.mouse.swit = 1;
-    else if(e.buttons === 0 && configMap.stage_map[configMap.mouse.row][configMap.mouse.col] == 1)configMap.mouse.swit = 0;
 
-    // クリック時の動作
-    //「configMap.mouse.swit」を現在位置ブロックに代入する。
-    // 例外：クリックしたままの状態で、前回動作した位置ブロックにまだ滞在している場合、同じ位置で再度動作しない。
-    //  * configMap.mouse._Col, configMap.mouse._Row：前回動作した位置ブロックの保存。
-    //    クリックにて押下されたボタンが放れれば、数値がリセットされる。→同じ位置で移動せず再度クリックしても正常動作。
-    if(e.buttons == 1 && !(configMap.mouse._Col == configMap.mouse.col && configMap.mouse._Row == configMap.mouse.row) ){
-      configMap.stage_map[configMap.mouse.row][configMap.mouse.col] = configMap.mouse.swit;
-      drawWindow();
-      configMap.mouse._Col = configMap.mouse.col;
-      configMap.mouse._Row = configMap.mouse.row;
-    } else {
-      configMap.mouse._Col = -1;
-      configMap.mouse._Row = -1;
+      // 取得した現在位置ブロックの状態に応じて、クリック時の動作を判定する。
+      // 空白：ブロックを埋める。
+      // 空白でない：ブロックを消す。
+      // 例外：クリックされたまま他のブロックに移った場合、最初のブロック状態の判定から変更しない。
+      //  * configMap.mouse.swit：クリック時の動作。「0」消す。「1」埋める。
+      //
+      if(e.buttons === 0 && configMap.stage_map[configMap.mouse.row][configMap.mouse.col] === 0)configMap.mouse.swit = 1;
+      else if(e.buttons === 0 && configMap.stage_map[configMap.mouse.row][configMap.mouse.col] == 1)configMap.mouse.swit = 0;
+
+      // クリック時の動作
+      //「configMap.mouse.swit」を現在位置ブロックに代入する。
+      // 例外：クリックしたままの状態で、前回動作した位置ブロックにまだ滞在している場合、同じ位置で再度動作しない。
+      //  * configMap.mouse._Col, configMap.mouse._Row：前回動作した位置ブロックの保存。
+      //    クリックにて押下されたボタンが放れれば、数値がリセットされる。→同じ位置で移動せず再度クリックしても正常動作。
+      if(e.buttons == 1 && !(configMap.mouse._Col == configMap.mouse.col && configMap.mouse._Row == configMap.mouse.row) ){
+        configMap.stage_map[configMap.mouse.row][configMap.mouse.col] = configMap.mouse.swit;
+        drawDisp();
+        configMap.mouse._Col = configMap.mouse.col;
+        configMap.mouse._Row = configMap.mouse.row;
+      } else {
+        configMap.mouse._Col = -1;
+        configMap.mouse._Row = -1;
+      }
+      
     }
-  }
   };
   //
   // --------------------onMouseMoveCanvas----------------------end
@@ -155,7 +170,7 @@ main.model = (function(){
   onMouseClickCanvas = function(e){
     if(configMap.stage_map[configMap.mouse.row][configMap.mouse.col] === 0)configMap.stage_map[configMap.mouse.row][configMap.mouse.col] = 1;
     else configMap.stage_map[configMap.mouse.row][configMap.mouse.col] = 0;
-    drawWindow();
+    drawDisp();
   };
   //
   // --------------------onMouseClickCanvas----------------------end
@@ -190,6 +205,7 @@ main.model = (function(){
     // イベントバインド
     mainCanvas.addEventListener('mousemove', onMouseMoveCanvas, false);
     mainCanvas.addEventListener('mousedown', onMouseClickCanvas, false);
+    $("#rad-range").on('input', onRadChange);
 
   };
   //
