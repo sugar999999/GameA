@@ -11,7 +11,7 @@ main.model = (function(){
       + '<div id=\"header\">Game<\/div>'
       + '<div id=\"main-disp\">Main'
         + '<canvas id=\"main-disp-window\"><\/canvas>'
-        + '<input type=\"range\" id=\"rad-range\" max=\"90\" min=\"-90\" value=\"0\"></input>'
+        + '<input type=\"range\" id=\"rad-range\" max=\"180\" min=\"-180\" value=\"0\"></input>'
       + '<\/div>'
       + '<div id=\"footer\">Footer<\/div>'
       + '<div id=\"nav\">Nav'
@@ -49,13 +49,36 @@ main.model = (function(){
     },
     disp_state: {
       rad: 0
+    },
+    ball_state: {
+      X: 0,
+      Y: 0,
+      gravity: 5,
+      vx: 0,
+      vy: 0,
+      radius: 10
     }
   },
   initModule, drawDisp, nav, onMouseMove, onMouseClick,
-  mainCanvas, style, mainCont, onRadChange;
+  mainCanvas, style, mainCont, onRadChange, updateStatus;
   //
   // ------------------difine---------------------end
 
+  // --------------------updateStatus----------------------start
+  //
+  updateStatus = function(){
+    configMap.ball_state.vx += Math.sin(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity;
+    if(configMap.ball_state.vx < configMap.ball_state.radius)configMap.ball_state.vx = configMap.ball_state.radius;
+    else if(configMap.ball_state.vx > mainCanvas.width - configMap.ball_state.radius)configMap.ball_state.vx = mainCanvas.width - configMap.ball_state.radius;
+    configMap.ball_state.vy += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity;
+    if(configMap.ball_state.vy < configMap.ball_state.radius)configMap.ball_state.vy = configMap.ball_state.radius;
+    else if(configMap.ball_state.vy > mainCanvas.height - configMap.ball_state.radius)configMap.ball_state.vy = mainCanvas.height - configMap.ball_state.radius;
+    configMap.ball_state.X = configMap.ball_state.vx;
+    configMap.ball_state.Y = configMap.ball_state.vy;
+  };
+
+  //
+  // --------------------updateStatus----------------------end
 
   // --------------------nav----------------------start
   //
@@ -103,12 +126,20 @@ main.model = (function(){
     // ---------------canvas px adapt------------------end
     mainCont = mainCanvas.getContext("2d");
 
+    // draw stage_map
     mainCont.fillStyle = "#aaaaaa";
     for(var i=0; i < configMap.stage_map.length; i++){
       for(var j=0; j < configMap.stage_map[i].length; j++){
         if(configMap.stage_map[i][j] == 1)mainCont.fillRect(j * configMap.block_size, i * configMap.block_size, configMap.block_size, configMap.block_size);
       }
     }
+
+    // draw ball
+    updateStatus();
+    mainCont.fillStyle = "#888888";
+    mainCont.beginPath();
+    mainCont.arc(configMap.ball_state.X, configMap.ball_state.Y, configMap.ball_state.radius, 0, Math.PI*2, true);
+    mainCont.fill();
   };
 
   //
@@ -159,7 +190,7 @@ main.model = (function(){
         configMap.mouse._Col = -1;
         configMap.mouse._Row = -1;
       }
-      
+
     }
   };
   //
@@ -195,9 +226,14 @@ main.model = (function(){
       .parent().next() //Footer
         .animate({width: 100 + "%"}, 1000)
         .css("bottom","0")
-        .animate({height: 100 + "px" }, 1000);
+        .animate({height: 100 + "px" }, {
+          duration: "1000",
+          complete: function(){
+            setInterval(drawDisp, 30);
+          }
+        });
 
-    // 「nav」要素の追加
+    // 要素の追加
     nav( $("#nav") );
 
     // エレメント取得
