@@ -4,7 +4,7 @@
 main.model = (function(){
 
   //
-  // ------------------difine---------------------
+  // ------------------difine---------------------start
   //
   var configMap = {
     main_html: String()
@@ -36,6 +36,7 @@ main.model = (function(){
     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],
 
     block_size: 25,
+
     mouse: {
       X: 0,
       Y: 0,
@@ -48,14 +49,18 @@ main.model = (function(){
   },
   initModule, drawWindow, nav, onMouseMove, onMouseClick,
   mainCanvas, style, mainCont;
-
-
   //
-  // --------------------nav----------------------
+  // ------------------difine---------------------end
+
+
+  // --------------------nav----------------------start
   //
   nav = function( $container ){
     var onOutputMap;
 
+    // -----------onOutputMap------------start
+    // 「configMap.stage_map」を配列表示で出力する。
+    //
     onOutputMap = function(e){
       var $output =
       $(this)
@@ -71,23 +76,27 @@ main.model = (function(){
         }
         $output.append(']');
       }
-    }
+    };
+    //
+    // -----------onOutputMap------------end
 
     $container
       .append('<div><textarea rows=\"16\" cols=\"36\"><\/textarea><\/diiv>')
       .find("#output-map")
       .bind('click', onOutputMap);
-  }
+  };
 
   //
-  // --------------------drawWindow----------------------
+  // --------------------nav----------------------end
+
+  // ------------------------drawWindow--------------------------start
   //
   drawWindow = function(){
-    // ------------------px adapt---------------------
+    // ---------------canvas px adapt------------------start
     style = window.getComputedStyle(mainCanvas);
     mainCanvas.width = +style.width.replace(/px/, "");
     mainCanvas.height = +style.width.replace(/px/, "");
-    // -----------------------------------------------
+    // ---------------canvas px adapt------------------end
     mainCont = mainCanvas.getContext("2d");
 
     mainCont.fillStyle = "#aaaaaa";
@@ -99,38 +108,64 @@ main.model = (function(){
   };
 
   //
-  // --------------------onMouseMoveCanvas----------------------
+  // ------------------------drawWindow--------------------------end
+
+  // --------------------onMouseMoveCanvas----------------------start
   //
   onMouseMoveCanvas = function(e){
+    // 「Canvas」内のマウスのX,Y座標を取得
     configMap.mouse.X = e.clientX - mainCanvas.getBoundingClientRect().left;
 		configMap.mouse.Y = e.clientY - mainCanvas.getBoundingClientRect().top;
+
+    // マウスの座標から現在位置ブロックの「Col」「Row」を算出
     configMap.mouse.col = Math.floor(configMap.mouse.X / configMap.block_size);
     configMap.mouse.row = Math.floor(configMap.mouse.Y / configMap.block_size);
+
+    if( (configMap.mouse.col < configMap.stage_map[0].length) && (configMap.mouse.row < configMap.stage_map.length) ){
+    // 取得した現在位置ブロックの状態に応じて、クリック時の動作を判定する。
+    // 空白：ブロックを埋める。
+    // 空白でない：ブロックを消す。
+    // 例外：クリックされたまま他のブロックに移った場合、最初のブロック状態の判定から変更しない。
+    //  * configMap.mouse.swit：クリック時の動作。「0」消す。「1」埋める。
+    //
     if(e.buttons === 0 && configMap.stage_map[configMap.mouse.row][configMap.mouse.col] === 0)configMap.mouse.swit = 1;
     else if(e.buttons === 0 && configMap.stage_map[configMap.mouse.row][configMap.mouse.col] == 1)configMap.mouse.swit = 0;
 
-    if(e.buttons == 1 && !(configMap.mouse.exCol == configMap.mouse.col && configMap.mouse.exRow == configMap.mouse.row) ){
+    // クリック時の動作
+    //「configMap.mouse.swit」を現在位置ブロックに代入する。
+    // 例外：クリックしたままの状態で、前回動作した位置ブロックにまだ滞在している場合、同じ位置で再度動作しない。
+    //  * configMap.mouse._Col, configMap.mouse._Row：前回動作した位置ブロックの保存。
+    //    クリックにて押下されたボタンが放れれば、数値がリセットされる。→同じ位置で移動せず再度クリックしても正常動作。
+    if(e.buttons == 1 && !(configMap.mouse._Col == configMap.mouse.col && configMap.mouse._Row == configMap.mouse.row) ){
       configMap.stage_map[configMap.mouse.row][configMap.mouse.col] = configMap.mouse.swit;
       drawWindow();
-      configMap.mouse.exCol = configMap.mouse.col;
-      configMap.mouse.exRow = configMap.mouse.row;
+      configMap.mouse._Col = configMap.mouse.col;
+      configMap.mouse._Row = configMap.mouse.row;
+    } else {
+      configMap.mouse._Col = -1;
+      configMap.mouse._Row = -1;
     }
+  }
   };
-
   //
-  // --------------------onMouseClickCanvas----------------------
+  // --------------------onMouseMoveCanvas----------------------end
+
+  // --------------------onMouseClickCanvas----------------------start
   //
   onMouseClickCanvas = function(e){
     if(configMap.stage_map[configMap.mouse.row][configMap.mouse.col] === 0)configMap.stage_map[configMap.mouse.row][configMap.mouse.col] = 1;
     else configMap.stage_map[configMap.mouse.row][configMap.mouse.col] = 0;
     drawWindow();
   };
-
   //
-  // --------------------initModule----------------------
+  // --------------------onMouseClickCanvas----------------------end
+
+
+  // --------------------initModule----------------------start
   //
   initModule = function($container){
 
+    // メイン要素の描画
     $container
       .append(configMap.main_html)
       .find("#header")
@@ -145,18 +180,20 @@ main.model = (function(){
       .parent().next() //Footer
         .animate({width: 100 + "%"}, 1000)
         .css("bottom","0")
-        .animate({height: 100 + "px" }, {duration: "1000", complete: function(){
+        .animate({height: 100 + "px" }, 1000);
 
+    // 「nav」要素の追加
+    nav( $("#nav") );
 
-        }});
+    // エレメント取得
+    mainCanvas = document.getElementById("main-disp-window");
+    // イベントバインド
+    mainCanvas.addEventListener('mousemove', onMouseMoveCanvas, false);
+    mainCanvas.addEventListener('mousedown', onMouseClickCanvas, false);
 
-        mainCanvas = document.getElementById("main-disp-window");
-
-        mainCanvas.addEventListener('mousemove', onMouseMoveCanvas, false);
-        mainCanvas.addEventListener('mousedown', onMouseClickCanvas, false);
-        nav( $("#nav") );
   };
-
+  //
+  // --------------------initModule----------------------end
 
 
   return {initModule: initModule};
