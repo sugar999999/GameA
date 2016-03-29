@@ -11,7 +11,7 @@ main.model = (function(){
       + '<div id=\"header\">Game<\/div>'
       + '<div id=\"main-disp\">Main'
         + '<canvas id=\"main-disp-window\"><\/canvas>'
-        + '<input type=\"range\" id=\"rad-range\" max=\"180\" min=\"-180\" value=\"0\"></input>'
+        + '<input type=\"range\" id=\"rad-range\" max=\"360\" min=\"-360\" value=\"0\"></input>'
       + '<\/div>'
       + '<div id=\"footer\">Footer<\/div>'
       + '<div id=\"nav\">Nav'
@@ -87,25 +87,45 @@ main.model = (function(){
     else if(configMap.ball_state.vy > mainCanvas.height - configMap.ball_state.radius)configMap.ball_state.vy = mainCanvas.height - configMap.ball_state.radius;
 
     // ブロックを通過しない判定
-    // ボール先端（ボールのX,Y＋半径）の「Col」「Row」を算出
-    configMap.ball_state._col = Math.floor((configMap.ball_state.vx + configMap.ball_state.radius) / configMap.block_size);
-    configMap.ball_state._row = Math.floor((configMap.ball_state.vy + configMap.ball_state.radius) / configMap.block_size);
-    // ボール先端にブロックがあるかどうか判定
-    if( (configMap.ball_state._col < configMap.stage_map[0].length ) && (configMap.ball_state._row < configMap.stage_map.length) ){
-      if(configMap.ball_state._col != configMap.ball_state.col){
-        if(configMap.stage_map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+    // ボール輪郭360度がブロックの輪郭を超えようとした場合の処理
+    for(var i = 0; i< 360; i++){
+
+      // ボール先端（ボールのX,Y＋半径）の「Col」「Row」を算出
+      configMap.ball_state._col = Math.floor((configMap.ball_state.vx + (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius)) / configMap.block_size);
+      configMap.ball_state._row = Math.floor((configMap.ball_state.vy + (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius)) / configMap.block_size);
+
+      // Canvasの枠に接する場合、「configMap.ball_state._row」が定義外のインデックスを指さないように調整
+      if( 0 > configMap.ball_state._row )configMap.ball_state._row = 0;
+      if( 0 > configMap.ball_state._col )configMap.ball_state._col = 0;
+      if( configMap.ball_state._col >= configMap.stage_map[0].length )configMap.ball_state._col = configMap.stage_map[0].length -1;
+      if(configMap.ball_state._row >= configMap.stage_map.length)configMap.ball_state._row = configMap.stage_map.length -1;
+
+      // ボール輪郭にブロックがあるかどうか判定。ブロック4面のどの面からの接触かによって場合分け。
+      if(configMap.ball_state._col > configMap.ball_state.col){
+        if(configMap.stage_map[configMap.ball_state.row][configMap.ball_state._col] == 1){
           configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
-          configMap.ball_state.vx -= configMap.ball_state.radius;
+          configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
         }
       }
-      if(configMap.ball_state._row != configMap.ball_state.row){
-        if(configMap.stage_map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+      if(configMap.ball_state._col < configMap.ball_state.col){
+        if(configMap.stage_map[configMap.ball_state.row][configMap.ball_state._col] == 1){
+          configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
+          configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+        }
+      }
+      if(configMap.ball_state._row > configMap.ball_state.row){
+        if(configMap.stage_map[configMap.ball_state._row][configMap.ball_state.col] == 1){
           configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
-          configMap.ball_state.vy -= configMap.ball_state.radius;
+          configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+        }
+      }
+      if(configMap.ball_state._row < configMap.ball_state.row){
+        if(configMap.stage_map[configMap.ball_state._row][configMap.ball_state.col] == 1){
+          configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
+          configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
         }
       }
     }
-
 
     // ボールの位置を移動
     configMap.ball_state.X = configMap.ball_state.vx;
