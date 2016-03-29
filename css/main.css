@@ -59,7 +59,6 @@ body{
   position: absolute;
   top: 50%;
   left: 50%;
-  margin: -200px 0 0 -200px;
   background: #000;
   color: #ddd;
   border: 2px #ddd solid;
