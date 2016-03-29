@@ -92,7 +92,7 @@ main.model = (function(){
     // ゴール判定
     if( configMap.ball_state.col == configMap.stage.goal.col && configMap.ball_state.row == configMap.stage.goal.row ){
       //goal();
-      clearinterval(configMap.stage.state.running);
+      clearInterval(configMap.stage.state.running);
       alert("goal!");
       return false;
     }
