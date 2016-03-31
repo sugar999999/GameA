@@ -126,7 +126,9 @@ main.model = (function(){
     configMap.ball_state.speedX += Math.sin(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
     configMap.ball_state.speedY += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
     if(configMap.ball_state.speedX >= configMap.block_size / 2)configMap.ball_state.speedX = configMap.block_size / 2;
+    else if(configMap.ball_state.speedX <= -(configMap.block_size / 2))configMap.ball_state.speedX = -configMap.block_size / 2;
     if(configMap.ball_state.speedY >= configMap.block_size / 2)configMap.ball_state.speedY = configMap.block_size / 2;
+    else if(configMap.ball_state.speedY <= -(configMap.block_size / 2))configMap.ball_state.speedY = -configMap.block_size / 2;
 
     configMap.ball_state.vx += configMap.ball_state.speedX;
     configMap.ball_state.vy += configMap.ball_state.speedY;
