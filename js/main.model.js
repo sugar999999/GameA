@@ -165,8 +165,8 @@ main.model = (function(){
     for(var i = 0; i< 360; i++){
 
       // ボール先端（ボールのX,Y＋半径）の「Col」「Row」を算出
-      configMap.ball_state._col = Math.floor((configMap.ball_state.vx + (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius)) / configMap.block_size);
-      configMap.ball_state._row = Math.floor((configMap.ball_state.vy + (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius)) / configMap.block_size);
+      configMap.ball_state._col = Math.floor((configMap.ball_state.vx + (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius)) / configMap.block_size);
+      configMap.ball_state._row = Math.floor((configMap.ball_state.vy + (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius)) / configMap.block_size);
 
       // Canvasの枠に接する場合、「configMap.ball_state._row」が定義外のインデックスを指さないように調整
       if( 0 > configMap.ball_state._row )configMap.ball_state._row = 0;
@@ -178,7 +178,7 @@ main.model = (function(){
       if(configMap.ball_state._col > configMap.ball_state.col){ // right
         if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] == 1){
           configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
-          configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+          configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
           configMap.ball_state.isOnWall[1] = true;
 
           // 壁に張り付く
@@ -188,22 +188,31 @@ main.model = (function(){
 
           if(configMap.ball_state._row < configMap.ball_state.row ){  //up
             if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
-              configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
-              configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[1] = true;
-              configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
-              configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[0] = true;
+              if(i <= 45){
+                configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
+                configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[1] = true;
+              }
+              if(i >= 45){
+                configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
+                configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[0] = true;
+              }
 
             }
           }else if(configMap.ball_state._row > configMap.ball_state.row ){  //down
             if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
-              configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
-              configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[1] = true;
-              configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
-              configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[2] = true;
+              if(i >= 315){
+                configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
+                configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[1] = true;
+              }
+              if(i <= 315){
+                configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
+                configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[2] = true;
+              }
+
 
             }
           }
@@ -212,7 +221,7 @@ main.model = (function(){
       if(configMap.ball_state._col < configMap.ball_state.col){ //left
         if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] == 1){
           configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
-          configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+          configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
           configMap.ball_state.isOnWall[3] = true;
 
           // 壁に張り付く
@@ -222,22 +231,32 @@ main.model = (function(){
         } else {
           if(configMap.ball_state._row < configMap.ball_state.row ){ //up
             if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
-              configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
-              configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[3] = true;
-              configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
-              configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[0] = true;
+              if(i >= 135){
+                configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
+                configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[3] = true;
+              }
+              if(i <= 135){
+                configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
+                configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[0] = true;
+              }
+
 
             }
           }else if(configMap.ball_state._row > configMap.ball_state.row ){ //down
             if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
-              configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
-              configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[3] = true;
-              configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
-              configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[2] = true;
+              if(i <= 225){
+                configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
+                configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[3] = true;
+              }
+              if(i >= 225){
+                configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
+                configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[2] = true;
+              }
+
 
             }
           }
@@ -246,7 +265,7 @@ main.model = (function(){
       if(configMap.ball_state._row > configMap.ball_state.row){ //down
         if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] == 1){
           configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
-          configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+          configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
           configMap.ball_state.isOnWall[2] = true;
 
           // 壁に張り付く
@@ -256,21 +275,29 @@ main.model = (function(){
         } else {
           if(configMap.ball_state._col > configMap.ball_state.col){ //right
             if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
-              configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
-              configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[2] = true;
-              configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
-              configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[1] = true;
+              if(i >= 315){
+                configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
+                configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[1] = true;
+              }
+              if(i <= 315){
+                configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
+                configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[2] = true;
+              }
             }
           } else if(configMap.ball_state._col < configMap.ball_state.col){ //left
             if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
-              configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
-              configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[2] = true;
-              configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
-              configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[3] = true;
+              if(i <= 225){
+                configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
+                configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[3] = true;
+              }
+              if(i >= 225){
+                configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
+                configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[2] = true;
+              }
 
 
             }
@@ -280,7 +307,7 @@ main.model = (function(){
       if(configMap.ball_state._row < configMap.ball_state.row){ //up
         if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] == 1){
           configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
-          configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+          configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
           configMap.ball_state.isOnWall[0] = true;
 
           // 壁に張り付く
@@ -289,23 +316,31 @@ main.model = (function(){
 
 
         }else {
-          if(configMap.ball_state._col > configMap.ball_state.col){
+          if(configMap.ball_state._col > configMap.ball_state.col){ //right
             if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
-              configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
-              configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[0] = true;
-              configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
-              configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[1] = true;
+              if(i <= 45){
+                configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
+                configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[1] = true;
+              }
+              if(i >= 45){
+                configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
+                configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[0] = true;
+              }
             }
-          } else if(configMap.ball_state._col < configMap.ball_state.col){
+          } else if(configMap.ball_state._col < configMap.ball_state.col){ //left
             if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
-              configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
-              configMap.ball_state.vy -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[0] = true;
-              configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
-              configMap.ball_state.vx -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-              //configMap.ball_state.isOnWall[3] = true;
+              if(i >= 135){
+                configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
+                configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[3] = true;
+              }
+              if(i <= 135){
+                configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
+                configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
+                //configMap.ball_state.isOnWall[0] = true;
+              }
 
 
             }
