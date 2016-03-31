@@ -44,7 +44,9 @@ main.model = (function(){
         col: 0,
         row: 0
       },
-      state: {}
+      state: {
+        now_stage: 1
+      }
     },
 
     block_size: 22,
@@ -78,8 +80,8 @@ main.model = (function(){
       isOnWall: [false,false,false,false], //up, right, down,  left
       vx: 0,
       vy: 0,
-      radius: 10,
-      gram: 2.0,
+      radius: 7,
+      gram: 1.5,
       powerX: 0,
       powerY: 0
     }
@@ -94,6 +96,7 @@ main.model = (function(){
   //
 
   gameStart = function(){
+    $("#rad-range").on('input', onRadChange);
     configMap.ball_state.X = (configMap.stage.start.col * configMap.block_size) + configMap.ball_state.radius;
     configMap.ball_state.Y = (configMap.stage.start.row * configMap.block_size) + configMap.ball_state.radius;
     configMap.stage.state.running = setInterval(drawDisp, 30);
@@ -114,7 +117,30 @@ main.model = (function(){
     if( configMap.ball_state.col == configMap.stage.goal.col && configMap.ball_state.row == configMap.stage.goal.row ){
       //goal();
       clearInterval(configMap.stage.state.running);
-      alert("goal!");
+      configMap.disp_state.rad = 0;
+      $("#rad-range").remove();
+      $("#main-disp-window") //Window
+        .animate({width: 1 + "px"}, 1000)
+        .animate({height: 1 + "px" },{
+          duration: "1000",
+          complete: function(){
+            configMap.stage.state.now_stage++;
+            main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage);
+            drawDisp();
+            $(this) //Window
+              .css("transform", "rotate(" + configMap.disp_state.rad + "deg)")
+              .animate({width: configMap.disp_state.wid + "px"}, 1000)
+              .animate({height: configMap.disp_state.hei + "px" },{
+                duration: "1000",
+                complete: function(){
+                  $("#main-disp").append('<input type=\"range\" id=\"rad-range\" max=\"360\" min=\"-360\" value=\"0\"></input>');
+                  gameStart();
+                }
+              });
+
+          }
+        });
+
       return false;
     }
 
@@ -506,13 +532,36 @@ main.model = (function(){
     };
 
     // draw stage.map
+    mainCont.lineWidth = 2;
+    mainCont.lineJoin = "bavel";
     for(var i=0; i < configMap.stage.map.length; i++){
       for(var j=0; j < configMap.stage.map[i].length; j++){
-        mainCont.fillStyle = "#"
+        mainCont.fillStyle = "#" //inner color
                             + ((11 - configMap.stage.map[i][j]).toString(16))
                             + ((3 - Math.floor(configMap.stage.map[i][j] / 3)).toString(16))
                             + ((0).toString(16));
-        if(configMap.stage.map[i][j] >= 1)mainCont.fillRect(j * configMap.block_size, i * configMap.block_size, configMap.block_size, configMap.block_size);
+
+        mainCont.strokeStyle = "#" //frame color
+                            + ((7 - (configMap.stage.map[i][j])).toString(16))
+                            + ((2 - Math.floor(configMap.stage.map[i][j] / 3)).toString(16))
+                            + ((0).toString(16));
+
+        if(configMap.stage.map[i][j] >= 1){
+          mainCont.fillRect(j * configMap.block_size, i * configMap.block_size, configMap.block_size, configMap.block_size);
+          // draw flame
+          mainCont.beginPath();
+          mainCont.moveTo(j * configMap.block_size, i * configMap.block_size);
+          if(i > 0 && configMap.stage.map[i-1][j] != configMap.stage.map[i][j])mainCont.lineTo((j * configMap.block_size) + configMap.block_size, (i * configMap.block_size));
+          else mainCont.moveTo((j * configMap.block_size) + configMap.block_size, (i * configMap.block_size));
+          if(j < configMap.stage.map[i].length-1 && configMap.stage.map[i][j+1] != configMap.stage.map[i][j])mainCont.lineTo((j * configMap.block_size) + configMap.block_size, (i * configMap.block_size) + configMap.block_size);
+          else mainCont.moveTo((j * configMap.block_size) + configMap.block_size, (i * configMap.block_size) + configMap.block_size);
+          if(i < configMap.stage.map.length-1 && configMap.stage.map[i+1][j] != configMap.stage.map[i][j])mainCont.lineTo((j * configMap.block_size), (i * configMap.block_size) + configMap.block_size);
+          else mainCont.moveTo((j * configMap.block_size), (i * configMap.block_size) + configMap.block_size);
+          if(j > 0 && configMap.stage.map[i][j-1] != configMap.stage.map[i][j])mainCont.lineTo(j * configMap.block_size, i * configMap.block_size);
+          mainCont.stroke();
+
+
+        }
       }
     }
 
@@ -522,15 +571,26 @@ main.model = (function(){
                         + ((12 - Math.floor(configMap.ball_state.gram)).toString(16))
                         + ((12 - Math.floor(configMap.ball_state.gram)).toString(16))
                         + ((12 - Math.floor(configMap.ball_state.gram)).toString(16));
+
+    mainCont.strokeStyle = "#"
+                        + ((5 - Math.floor(configMap.ball_state.gram)).toString(16))
+                        + ((5 - Math.floor(configMap.ball_state.gram)).toString(16))
+                        + ((5 - Math.floor(configMap.ball_state.gram)).toString(16));
+
+    mainCont.lineWidth = 2;
+
     mainCont.beginPath();
     mainCont.arc(configMap.ball_state.X, configMap.ball_state.Y, configMap.ball_state.radius, 0, Math.PI*2, true);
     mainCont.fill();
+    mainCont.stroke();
 
     // draw goal
     mainCont.fillStyle = "#d00";
+    mainCont.strokeStyle = "#500";
     mainCont.beginPath();
     mainCont.arc((configMap.stage.goal.col * configMap.block_size) + configMap.block_size / 2, (configMap.stage.goal.row * configMap.block_size) + configMap.block_size / 2, configMap.ball_state.radius, 0, Math.PI*2, true);
     mainCont.fill();
+    mainCont.stroke();
   };
 
   //
@@ -621,7 +681,7 @@ main.model = (function(){
         .animate({height: 100 + "px" }, {
           duration: "1000",
           complete: function(){
-            main.stagelist.mapMake(configMap.stage, "_1");
+            main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage);
             gameStart();
           }
         });
@@ -634,7 +694,7 @@ main.model = (function(){
     // イベントバインド
     mainCanvas.addEventListener('mousemove', onMouseMoveCanvas, false);
     mainCanvas.addEventListener('mousedown', onMouseClickCanvas, false);
-    $("#rad-range").on('input', onRadChange);
+
 
   };
   //
