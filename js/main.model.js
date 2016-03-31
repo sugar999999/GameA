@@ -78,7 +78,10 @@ main.model = (function(){
       isOnWall: [false,false,false,false], //up, right, down,  left
       vx: 0,
       vy: 0,
-      radius: 10
+      radius: 10,
+      gram: 2.0,
+      powerX: 0,
+      powerY: 0
     }
   },
   initModule, drawDisp, nav, onMouseMove, onMouseClick,
@@ -122,11 +125,13 @@ main.model = (function(){
 
     configMap.ball_state.speedX += Math.sin(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
     configMap.ball_state.speedY += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
-    if(configMap.ball_state.speedX >= configMap.block_size)configMap.ball_state.speedX = configMap.block_size / 2;
-    if(configMap.ball_state.speedY >= configMap.block_size)configMap.ball_state.speedX = configMap.block_size / 2;
+    if(configMap.ball_state.speedX >= configMap.block_size / 2)configMap.ball_state.speedX = configMap.block_size / 2;
+    if(configMap.ball_state.speedY >= configMap.block_size / 2)configMap.ball_state.speedY = configMap.block_size / 2;
 
     configMap.ball_state.vx += configMap.ball_state.speedX;
     configMap.ball_state.vy += configMap.ball_state.speedY;
+    configMap.ball_state.powerX = Math.abs(configMap.ball_state.gram * configMap.ball_state.speedX);
+    configMap.ball_state.powerY = Math.abs(configMap.ball_state.gram * configMap.ball_state.speedY);
 
     // 「mainCanvas」からスケールアウトしないように値を調整。
     if(configMap.ball_state.vx < configMap.ball_state.radius){
@@ -168,18 +173,32 @@ main.model = (function(){
       configMap.ball_state._col = Math.floor((configMap.ball_state.vx + (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius)) / configMap.block_size);
       configMap.ball_state._row = Math.floor((configMap.ball_state.vy + (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius)) / configMap.block_size);
 
-      // Canvasの枠に接する場合、「configMap.ball_state._row」が定義外のインデックスを指さないように調整
+      // Canvasの枠に接する場合、「configMap.ball_state._row」が未定義のインデックスを指さないように調整
       if( 0 > configMap.ball_state._row )configMap.ball_state._row = 0;
       if( 0 > configMap.ball_state._col )configMap.ball_state._col = 0;
       if( configMap.ball_state._col >= configMap.stage.map[0].length )configMap.ball_state._col = configMap.stage.map[0].length -1;
       if(configMap.ball_state._row >= configMap.stage.map.length)configMap.ball_state._row = configMap.stage.map.length -1;
 
       // ボール輪郭にブロックがあるかどうか判定。ブロック4面のどの面からの接触かによって場合分け。
+      // ・4面それぞれの方向からの衝突に加え、角に衝突した場合の処理を、以下の条件で追加。
+      // 「現在位置ブロックの縦横方向にブロックが存在せず、且つ斜め方向にブロックがある場合」
+      // ・衝突の角度によっては、「vx」、「vy」を生かす。
+      // 条件：
+      //  衝突の角度がちょうど45度の場合　→　「vx」、「vy」どちらも殺す
+      //  45度よりX軸寄り　→　「vx」のみ殺す
+      //  45度よりY軸寄り　→　「vy」のみ殺す
+      //
       if(configMap.ball_state._col > configMap.ball_state.col){ // right
-        if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] == 1){
+        if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] >= 1){
           configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
           configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
           configMap.ball_state.isOnWall[1] = true;
+
+          // ブロック破壊判定　横
+          if(configMap.ball_state.powerX > configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] * configMap.block_size){
+            configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] -= 1;
+            if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] = 0;
+          }
 
           // 壁に張り付く
           // configMap.ball_state.speedX = configMap.ball_state._speedX;
@@ -187,42 +206,59 @@ main.model = (function(){
         } else {
 
           if(configMap.ball_state._row < configMap.ball_state.row ){  //up
-            if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+            if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] < 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] >= 1){
               if(i <= 45){
                 configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
                 configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[1] = true;
+
               }
               if(i >= 45){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[0] = true;
+
+              }
+
+              // ブロック破壊判定　斜め
+              if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size * 2){
+                configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
               }
 
             }
           }else if(configMap.ball_state._row > configMap.ball_state.row ){  //down
-            if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+            if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] < 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] >= 1){
               if(i >= 315){
                 configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
                 configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[1] = true;
+
               }
               if(i <= 315){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[2] = true;
+
               }
 
+              // ブロック破壊判定　斜め
+              if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180) )) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size * 2){
+                configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
+              }
 
             }
           }
         }
       }
       if(configMap.ball_state._col < configMap.ball_state.col){ //left
-        if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] == 1){
+        if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] >= 1){
           configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
           configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
           configMap.ball_state.isOnWall[3] = true;
+
+          // ブロック破壊判定　横
+          if(configMap.ball_state.powerX > configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] * configMap.block_size){
+            configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] -= 1;
+            if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] = 0;
+          }
 
           // 壁に張り付く
           // configMap.ball_state.speedX = configMap.ball_state._speedX;
@@ -230,31 +266,42 @@ main.model = (function(){
 
         } else {
           if(configMap.ball_state._row < configMap.ball_state.row ){ //up
-            if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+            if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] < 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] >= 1){
               if(i >= 135){
                 configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
                 configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[3] = true;
+
               }
               if(i <= 135){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[0] = true;
+
               }
 
+              // ブロック破壊判定　斜め
+              if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size * 2){
+                configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
+              }
 
             }
           }else if(configMap.ball_state._row > configMap.ball_state.row ){ //down
-            if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+            if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] < 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] >= 1){
               if(i <= 225){
                 configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
                 configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[3] = true;
+
               }
               if(i >= 225){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[2] = true;
+
+              }
+
+              // ブロック破壊判定　斜め
+              if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size * 2){
+                configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
               }
 
 
@@ -263,10 +310,16 @@ main.model = (function(){
         }
       }
       if(configMap.ball_state._row > configMap.ball_state.row){ //down
-        if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] == 1){
+        if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] >= 1){
           configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
           configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
           configMap.ball_state.isOnWall[2] = true;
+
+          // ブロック破壊判定　縦
+          if(configMap.ball_state.powerY > configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] * configMap.block_size){
+            configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] -= 1;
+            if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] = 0;
+          }
 
           // 壁に張り付く
           // configMap.ball_state.speedX = configMap.ball_state._speedX;
@@ -274,29 +327,42 @@ main.model = (function(){
 
         } else {
           if(configMap.ball_state._col > configMap.ball_state.col){ //right
-            if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+            if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] < 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] >= 1){
               if(i >= 315){
                 configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
                 configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[1] = true;
+
               }
               if(i <= 315){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[2] = true;
+
               }
+
+              // ブロック破壊判定　斜め
+              if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size * 2){
+                configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
+              }
+
             }
           } else if(configMap.ball_state._col < configMap.ball_state.col){ //left
-            if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+            if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] < 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] >= 1){
               if(i <= 225){
                 configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
                 configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[3] = true;
+
               }
               if(i >= 225){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[2] = true;
+
+              }
+
+              // ブロック破壊判定　斜め
+              if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size * 2){
+                configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
               }
 
 
@@ -305,10 +371,16 @@ main.model = (function(){
         }
       }
       if(configMap.ball_state._row < configMap.ball_state.row){ //up
-        if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] == 1){
+        if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] >= 1){
           configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
           configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
           configMap.ball_state.isOnWall[0] = true;
+
+          // ブロック破壊判定　縦
+          if(configMap.ball_state.powerY > configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] * configMap.block_size){
+            configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] -= 1;
+            if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] = 0;
+          }
 
           // 壁に張り付く
           // configMap.ball_state.speedX = configMap.ball_state._speedX;
@@ -317,31 +389,43 @@ main.model = (function(){
 
         }else {
           if(configMap.ball_state._col > configMap.ball_state.col){ //right
-            if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+            if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] < 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] >= 1){
               if(i <= 45){
                 configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
                 configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[1] = true;
+
               }
               if(i >= 45){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[0] = true;
+
               }
+
+              // ブロック破壊判定　斜め
+              if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size * 2){
+                configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
+              }
+
             }
           } else if(configMap.ball_state._col < configMap.ball_state.col){ //left
-            if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] != 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] == 1){
+            if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] < 1 && configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] >= 1){
               if(i >= 135){
                 configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size + configMap.block_size;
                 configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[3] = true;
+
               }
               if(i <= 135){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
-                //configMap.ball_state.isOnWall[0] = true;
+
               }
 
+              // ブロック破壊判定　斜め
+              if( ( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size * 2){
+                configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
+              }
 
             }
           }
@@ -420,16 +504,22 @@ main.model = (function(){
     };
 
     // draw stage.map
-    mainCont.fillStyle = "#aaaaaa";
     for(var i=0; i < configMap.stage.map.length; i++){
       for(var j=0; j < configMap.stage.map[i].length; j++){
-        if(configMap.stage.map[i][j] == 1)mainCont.fillRect(j * configMap.block_size, i * configMap.block_size, configMap.block_size, configMap.block_size);
+        mainCont.fillStyle = "#"
+                            + ((11 - configMap.stage.map[i][j]).toString(16))
+                            + ((3 - Math.floor(configMap.stage.map[i][j] / 3)).toString(16))
+                            + ((0).toString(16));
+        if(configMap.stage.map[i][j] >= 1)mainCont.fillRect(j * configMap.block_size, i * configMap.block_size, configMap.block_size, configMap.block_size);
       }
     }
 
     // draw ball
     updateStatus();
-    mainCont.fillStyle = "#888888";
+    mainCont.fillStyle = "#"
+                        + ((12 - Math.floor(configMap.ball_state.gram)).toString(16))
+                        + ((12 - Math.floor(configMap.ball_state.gram)).toString(16))
+                        + ((12 - Math.floor(configMap.ball_state.gram)).toString(16));
     mainCont.beginPath();
     mainCont.arc(configMap.ball_state.X, configMap.ball_state.Y, configMap.ball_state.radius, 0, Math.PI*2, true);
     mainCont.fill();
