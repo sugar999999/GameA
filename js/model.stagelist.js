@@ -60,7 +60,7 @@ main.stagelist = (function () {
     }
   },
 
-  mapmMake;
+  mapMake;
 
 
   mapMake = function( list, target ){

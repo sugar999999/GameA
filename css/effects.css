@@ -1,0 +1,26 @@
+/* effects.css
+ * by sugar999999
+ */
+
+ #goal-effect, #gameStart-effect, #stageStart-effect {
+   position: absolute;
+   left: -50%;
+   top: 50%;
+   z-index: 5;
+   width: 400px;
+   height: 200px;
+   margin: -100px 0 0 -200px;
+   background:transparent;
+   text-align: center;
+   font: italic 800 100px/100px Arial, Times, sans-serif;
+   transform: rotate(-15deg);
+   color: #a00;
+   text-shadow:
+		-2px -2px #fff,
+		2px -2px #fff,
+		-2px 2px #fff,
+		2px 2px #fff;
+ }
+ #stageStart-effect {
+   vertical-align: middle;
+ }
