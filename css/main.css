@@ -59,7 +59,7 @@ body{
   position: absolute;
   top: 50%;
   left: 50%;
-  background: #000;
+  background: #200;
   color: #ddd;
   border: 2px #ddd solid;
 }
@@ -107,4 +107,20 @@ body{
 #output-map:hover{
   cursor: pointer;
   background: #ccc;
+}
+
+#gram-range {
+  position: absolute;
+  top: 370px;
+  left: 10%;
+  width: 100px;
+  margin-left: 20px;
+}
+
+#rebound-range {
+  position: absolute;
+  top: 450px;
+  left: 10%;
+  width: 100px;
+  margin-left: 20px;
 }
