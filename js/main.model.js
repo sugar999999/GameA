@@ -11,7 +11,7 @@ main.model = (function(){
       + '<div id=\"header\">Game<\/div>'
       + '<div id=\"main-disp\">Main'
         + '<canvas id=\"main-disp-window\"><\/canvas>'
-        + '<input type=\"range\" id=\"rad-range\" max=\"360\" min=\"-360\" value=\"0\"></input>'
+        + '<input type=\"range\" id=\"rad-range\" max=\"135\" min=\"-135\" value=\"0\"></input>'
       + '<\/div>'
       + '<div id=\"footer\">Footer<\/div>'
       + '<div id=\"nav\">Nav'
@@ -278,9 +278,9 @@ main.model = (function(){
         configMap.ball_state.rebound -= 0.25;
         if(configMap.ball_state.rebound < 0)configMap.ball_state.rebound = 0;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
-      }
+
       // Gram+ item
-      if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -6){ // a little
+      }else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -6){ // a little
         configMap.ball_state.gram += 0.5;
         if(configMap.ball_state.gram > 2.0)configMap.ball_state.gram = 60;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
@@ -295,6 +295,17 @@ main.model = (function(){
       }else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -9){ // more high
         configMap.ball_state.gram += 10;
         if(configMap.ball_state.gram > 60)configMap.ball_state.gram = 60;
+        configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
+
+      // Gravity change item
+      } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -10){ // reverse
+        configMap.ball_state.gravity *= -1;
+        configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
+      } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -11){ // half
+        configMap.ball_state.gravity /= 2;
+        configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
+      } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -12){ // double
+        configMap.ball_state.gravity *= 2;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
       }
 
@@ -871,7 +882,7 @@ main.model = (function(){
 
 
             mainCont.strokeText("+≪|", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
-            mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 10);
+            mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 11);
 
 
           } else if(configMap.stage.map[i][j] == -5){
@@ -901,11 +912,11 @@ main.model = (function(){
 
 
             mainCont.strokeText("-≪|", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
-            mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 10);
+            mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 11);
 
-          } else if(configMap.stage.map[i][j] >= -10){
+          } else if(configMap.stage.map[i][j] >= -9){
 
-            //rebound- item
+            //gram+ item
             if(!configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]]){
               configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]] = 12;
 
@@ -930,7 +941,37 @@ main.model = (function(){
 
 
             mainCont.strokeText("+ kg", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
-            mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 10);
+            mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 11);
+
+          } else if(configMap.stage.map[i][j] >= -12){
+
+            //gravity reverse item
+            if(!configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]]){
+              configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]] = 12;
+
+              mainCont.fillStyle = "#"
+                                    + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                    + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                    + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16);
+
+            } else {
+              if(configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]] >= 1){
+                configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]]--;
+
+                mainCont.fillStyle = "#"
+                                      + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                      + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                      + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16);
+              } else {
+                delete configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]];
+              }
+
+            }
+
+            if(configMap.stage.map[i][j] == -10)mainCont.strokeText("↑↑↓↓", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            else if(configMap.stage.map[i][j] == -11)mainCont.strokeText("↓↓/2", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            else if(configMap.stage.map[i][j] == -12)mainCont.strokeText("↓↓x2", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 11);
 
           }
 
