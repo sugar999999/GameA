@@ -64,11 +64,13 @@ main.model = (function(){
       },
       goal: {
         col: 0,
-        row: 0
+        row: 0,
+        area: 0
       },
       state: {
         now_stage: 1,
-        itemGcolor: {}
+        itemGcolor: {},
+        now_area: 1
       }
     },
 
@@ -112,7 +114,7 @@ main.model = (function(){
   },
   initModule, drawDisp, nav, onMouseMove, onMouseClick,
   mainCanvas, style, mainCont, onRadChange, updateStatus,
-  gameStart;
+  gameStart, warpArea;
   //
   // ------------------difine---------------------end
 
@@ -169,7 +171,7 @@ main.model = (function(){
         duration: "0",
         complete: function(){
           configMap.stage.state.now_stage++;
-          main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage);
+          main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, 1);
           drawDisp();
           $(this) //Window
             .animate({width: configMap.disp_state.wid + "px"}, 0)
@@ -194,6 +196,50 @@ main.model = (function(){
   //
   // -----------------------goal-------------------------end
 
+  // -----------------------warpArea-----------------------start
+  //
+  warpArea = function( no, direction ){
+    clearInterval(configMap.stage.state.running);
+    delete configMap.stage.state.running;
+    if(direction == "U" || direction == "D")$("#main-disp-window").animate({height: 0 + "px"}, {
+        duration: "1000",
+        complete: function(){
+          main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, no);
+          drawDisp();
+          $(this) //Window
+            .animate({height: configMap.disp_state.hei + "px" },{
+              duration: "1000",
+              complete: function(){
+                if(direction == "U")configMap.ball_state.Y = (Math.abs(configMap.ball_state.row - configMap.stage.map.length) * configMap.block_size) - (configMap.ball_state.radius + 1);
+                else if(direction == "D")configMap.ball_state.Y = (Math.abs(configMap.ball_state.row - configMap.stage.map.length) * configMap.block_size) + (configMap.ball_state.radius + 1);
+
+                configMap.stage.state.running = setInterval(drawDisp, 30);
+              }
+            });
+
+        }
+      });
+    else $("#main-disp-window").animate({width: 0 + "px" },{
+        duration: "1000",
+        complete: function(){
+          main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, no);
+          drawDisp();
+          $(this) //Window
+            .animate({width: configMap.disp_state.hei + "px" },{
+              duration: "1000",
+              complete: function(){
+                if(direction == "L")configMap.ball_state.X = (Math.abs(configMap.ball_state.col - configMap.stage.map[0].length) * configMap.block_size) + (configMap.ball_state.radius + 1);
+                else if(direction == "R")configMap.ball_state.X = (Math.abs(configMap.ball_state.col - 15) * configMap.stage.map[0].length) - (configMap.ball_state.radius + 1);
+                configMap.stage.state.running = setInterval(drawDisp, 30);
+              }
+            });
+
+        }
+      });
+  }
+  //
+  // -----------------------warpArea-----------------------end
+
   // --------------------updateStatus----------------------start
   //
   updateStatus = function(){
@@ -203,7 +249,7 @@ main.model = (function(){
     configMap.ball_state.row = Math.floor(configMap.ball_state.Y / configMap.block_size);
 
     // ゴール判定
-    if( configMap.ball_state.col == configMap.stage.goal.col && configMap.ball_state.row == configMap.stage.goal.row && !configMap.stage.state.isStarting  ){
+    if( configMap.stage.goal.area == configMap.stage.state.now_area && configMap.ball_state.col == configMap.stage.goal.col && configMap.ball_state.row == configMap.stage.goal.row && !configMap.stage.state.isStarting  ){
       goal();
 
       return false;
@@ -275,30 +321,45 @@ main.model = (function(){
     // 「mainCanvas」からスケールアウトしないように値を調整。
     if(configMap.ball_state.vx < configMap.ball_state.radius){
       configMap.ball_state.vx = configMap.ball_state.radius;
-      configMap.ball_state.isOnWall[3] = true;
 
+      // area移動判定
+      if( typeof configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] === 'string'){
+        warpArea( Number(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col].slice(4)), "L" );
+      }
       // 壁に張り付く
       // configMap.ball_state.speedX = configMap.ball_state._speedX;
       // configMap.ball_state.speedY = configMap.ball_state._speedY;
     }else if(configMap.ball_state.vx > mainCanvas.width - configMap.ball_state.radius){
       configMap.ball_state.vx = mainCanvas.width - configMap.ball_state.radius;
-      configMap.ball_state.isOnWall[1] = true;
 
+
+      // area移動判定
+      if( typeof configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] === 'string'){
+        warpArea( Number(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col].slice(4)), "R" );
+      }
       // 壁に張り付く
       // configMap.ball_state.speedX = configMap.ball_state._speedX;
       // configMap.ball_state.speedY = configMap.ball_state._speedY;
     }
     if(configMap.ball_state.vy < configMap.ball_state.radius){
       configMap.ball_state.vy = configMap.ball_state.radius;
-      configMap.ball_state.isOnWall[0] = true;
 
+
+      // area移動判定
+      if( typeof configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] === 'string'){
+        warpArea( Number(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col].slice(4)), "U" );
+      }
       // 壁に張り付く
       // configMap.ball_state.speedX = configMap.ball_state._speedX;
       // configMap.ball_state.speedY = configMap.ball_state._speedY;
     }else if(configMap.ball_state.vy > mainCanvas.height - configMap.ball_state.radius){
       configMap.ball_state.vy = mainCanvas.height - configMap.ball_state.radius;
-      configMap.ball_state.isOnWall[2] = true;
 
+
+      // area移動判定
+      if( typeof configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] === 'string'){
+        warpArea( Number(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col].slice(4)), "D" );
+      }
       // 壁に張り付く
       // configMap.ball_state.speedX = configMap.ball_state._speedX;
       // configMap.ball_state.speedY = configMap.ball_state._speedY;
@@ -578,10 +639,12 @@ main.model = (function(){
     if( configMap.ball_state.isOnWall[0] || configMap.ball_state.isOnWall[2] ){
       configMap.ball_state.speedY = configMap.ball_state.speedY * -configMap.ball_state.rebound;
       if(configMap.ball_state.rebound > 0.5)configMap.ball_state.rebound -= .01
+
     }
     if( configMap.ball_state.isOnWall[1] || configMap.ball_state.isOnWall[3] ){
       configMap.ball_state.speedX = configMap.ball_state.speedX * -configMap.ball_state.rebound;
       if(configMap.ball_state.rebound > 0.5)configMap.ball_state.rebound -= .01
+
     }
 
     for(var i = 0; i < 4; i++)configMap.ball_state.isOnWall[i] = false;
@@ -734,18 +797,23 @@ main.model = (function(){
     for(var i=0; i < configMap.stage.map.length; i++){
       for(var j=0; j < configMap.stage.map[i].length; j++){
 
-        mainCont.fillStyle = "#" //inner color
-                            + ((11 - configMap.stage.map[i][j]).toString(16))
-                            + ((3 - Math.floor(configMap.stage.map[i][j] / 3)).toString(16))
-                            + ((0).toString(16));
+        if( configMap.stage.map[i][j] == 99){
+          mainCont.fillStyle = "#610";
 
+        }else{
+          mainCont.fillStyle = "#" //inner color
+                              + ((11 - configMap.stage.map[i][j]).toString(16))
+                              + ((3 - Math.floor(configMap.stage.map[i][j] / 3)).toString(16))
+                              + ((0).toString(16));
+        }
 
 
         if(configMap.stage.map[i][j] >= 1){
           mainCont.lineWidth = 2;
           mainCont.lineJoin = "bavel";
           if((configMap.stage.map[i][j]) >= 7){ //frame color
-            mainCont.strokeStyle = "#000";
+            if( configMap.stage.map[i][j] == 99)mainCont.strokeStyle = "#300";
+            else mainCont.strokeStyle = "#000";
           } else {
             mainCont.strokeStyle = "#" + ((7 - (configMap.stage.map[i][j])).toString(16))
                                 + ((2 - Math.floor(configMap.stage.map[i][j] / 3)).toString(16))
@@ -910,14 +978,17 @@ main.model = (function(){
       mainCont.fill();
       mainCont.stroke();
 
-      // draw goal
-      mainCont.fillStyle = "#d00";
-      mainCont.strokeStyle = "#500";
-      mainCont.beginPath();
-      mainCont.arc((configMap.stage.goal.col * configMap.block_size) + configMap.block_size / 2, (configMap.stage.goal.row * configMap.block_size) + configMap.block_size / 2, configMap.ball_state.radius, 0, Math.PI*2, true);
-      mainCont.fill();
-      mainCont.stroke();
 
+      // draw goal
+      if(configMap.stage.goal.area == configMap.stage.state.now_area){
+        mainCont.fillStyle = "#d00";
+        mainCont.strokeStyle = "#500";
+        mainCont.beginPath();
+        mainCont.arc((configMap.stage.goal.col * configMap.block_size) + configMap.block_size / 2, (configMap.stage.goal.row * configMap.block_size) + configMap.block_size / 2, configMap.ball_state.radius, 0, Math.PI*2, true);
+        mainCont.fill();
+        mainCont.stroke();
+
+      }
 
     }
 
@@ -1014,7 +1085,7 @@ main.model = (function(){
         .animate({height: 100 + "px" }, {
           duration: "1000",
           complete: function(){
-            main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage);
+            main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, 1);
             gameStart();
           }
         });
