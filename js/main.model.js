@@ -10,8 +10,13 @@ main.model = (function(){
     main_html: String()
       + '<div id=\"header\">Game<\/div>'
       + '<div id=\"main-disp\">Main'
-        + '<canvas id=\"main-disp-window\"><\/canvas>'
-        + '<input type=\"range\" id=\"rad-range\" max=\"135\" min=\"-135\" value=\"0\"></input>'
+        + '<div id=\"main-disp-direction\">'
+          + '<div id=\"TOP\">TOP<\/div>'
+          + '<div id=\"LEFT\">LEFT<\/div>'
+          + '<div id=\"RIGHT\">RIGHT<\/div>'
+          + '<div id=\"BOTTOM\">▼<\/div>'
+        + '<\/div><canvas id=\"main-disp-window\"><\/canvas>'
+        + '<input type=\"range\" id=\"rad-range\" max=\"180\" min=\"-180\" value=\"0\" step=\"45\"><\/input>'
       + '<\/div>'
       + '<div id=\"footer\">Footer<\/div>'
       + '<div id=\"nav\">Nav'
@@ -24,6 +29,15 @@ main.model = (function(){
         + '<div id=\"rebound-range\">reb: '
           + '<textarea id=\"output-rebound\" rows=\"1\" cols=\"3\">0<\/textarea>'
           + '<input type=\"range\" id=\"_rebound-range\" max=\"2.0" min=\"0\" step=\"0.1\" value=\"0\"><\/input>'
+        + '<\/div>'
+        + '<div id=\"disp-rad-range\">rad-range: '
+          + '<textarea id=\"output-rad-range\" rows=\"1\" cols=\"3\">45<\/textarea>'
+          + '<input type=\"range\" id=\"_rad-range\" max=\"90" min=\"1\" step=\"1\" value=\"45\"><\/input>'
+        + '<\/div>'
+        + '<div id=\"disp-rad-max-range\">rad-max: '
+          + '<textarea id=\"output-rad-max\" rows=\"1\" cols=\"3\">180<\/textarea>'
+          + '<input type=\"range\" id=\"_rad-max\" max=\"360" min=\"135\" step=\"45\" value=\"180\"><\/input>'
+          + 'turnMode: <input type=\"checkbox\" id=\"_turnMode\"><\/input>'
         + '<\/div>'
         // testplaytools-------------------------end
       + '<\/div>',
@@ -88,7 +102,10 @@ main.model = (function(){
     disp_state: {
       rad: 0,
       wid: 352,
-      hei: 352
+      hei: 352,
+      rad_range: 45,
+      rad_max: 180,
+      mode: 0
     },
     ball_state: {
       X: 0,
@@ -155,7 +172,7 @@ main.model = (function(){
 
         var dispreset = setInterval(function(){
           configMap.disp_state.rad++;
-          $("#main-disp-window") //Window
+          $("#main-disp-direction") //Window
           .css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
           if(configMap.disp_state.rad == 360 || configMap.disp_state.rad === 0)clearInterval(dispreset);
         }, 3);
@@ -185,7 +202,7 @@ main.model = (function(){
                       $(this).remove();
                     }
                   });
-                $("#main-disp").append('<input type=\"range\" id=\"rad-range\" max=\"360\" min=\"-360\" value=\"0\"></input>');
+                $("#main-disp").append('<input type=\"range\" id=\"rad-range\" max=\"' + configMap.disp_state.rad_max + '\" min=\"-' + configMap.disp_state.rad_max + '\" value=\"0\" step=\"' + configMap.disp_state.rad_range + '\"></input>');
                 gameStart();
               }
             });
@@ -282,11 +299,11 @@ main.model = (function(){
       // Gram+ item
       }else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -6){ // a little
         configMap.ball_state.gram += 0.5;
-        if(configMap.ball_state.gram > 2.0)configMap.ball_state.gram = 60;
+        if(configMap.ball_state.gram > 60)configMap.ball_state.gram = 60;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
       }else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -7){ // middle
         configMap.ball_state.gram += 3.0;
-        if(configMap.ball_state.gram > 2.0)configMap.ball_state.gram = 60;
+        if(configMap.ball_state.gram > 60)configMap.ball_state.gram = 60;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
       }else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -8){ // high
         configMap.ball_state.gram += 5.0;
@@ -317,8 +334,8 @@ main.model = (function(){
     configMap.ball_state.vx = configMap.ball_state.X;
     configMap.ball_state.vy = configMap.ball_state.Y;
 
-    configMap.ball_state.speedX += Math.sin(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
-    configMap.ball_state.speedY += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
+    configMap.ball_state.speedX += Math.sin(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .05;
+    configMap.ball_state.speedY += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .05;
     if(configMap.ball_state.speedX >= configMap.block_size / 2)configMap.ball_state.speedX = configMap.block_size / 2;
     else if(configMap.ball_state.speedX <= -(configMap.block_size / 2))configMap.ball_state.speedX = -configMap.block_size / 2;
     if(configMap.ball_state.speedY >= configMap.block_size / 2)configMap.ball_state.speedY = configMap.block_size / 2;
@@ -672,7 +689,31 @@ main.model = (function(){
   // --------------------nav----------------------start
   //
   nav = function( $container ){
-    var onOutputMap, onGramChange, onReboundChange;
+    var onOutputMap, onGramChange, onReboundChange,
+    onDispRadMaxChange, onDispRadRangeChange, navExtend, changeMode;
+
+    // -----------navExtend-------------start
+    //
+    navExtend = function(e){
+      var pos = $(this).css("bottom");
+
+      if(configMap.stage.state.isStarting)return false;
+
+      if(pos == "0px"){
+        $(this).animate({bottom: -45 + "%"},30);
+        clearInterval(configMap.stage.state.running);
+        configMap.stage.state.running = setInterval(drawDisp, 30);
+      }else{
+        clearInterval(configMap.stage.state.running);
+        delete configMap.stage.state.running;
+        $(this).animate({bottom: 0 + "px"},30);
+      }
+
+
+    };
+
+    //
+    // -----------navExtend-------------end
 
     // -----------onOutputMap------------start
     // 「configMap.stage.map」を配列表示で出力する。
@@ -680,7 +721,7 @@ main.model = (function(){
     onOutputMap = function(e){
       var $output =
       $(this)
-        .parent()
+        .append('<div><textarea id="output-map-text" rows=\"16\" cols=\"36\"><\/textarea><\/div>')
         .find("#output-map-text");
 
       for(var i=0; i < configMap.stage.map.length; i++){
@@ -691,6 +732,7 @@ main.model = (function(){
           continue;
         }
         $output.append(']');
+
       }
     };
     //
@@ -724,10 +766,60 @@ main.model = (function(){
     //
     // --------onReboundChange----------end
 
+    // -----------onDispRadRangeChange-------------start
+    //
+    onDispRadRangeChange = function(e) {
+      configMap.disp_state.rad_range = $(this).val();
+      $("#rad-range").remove();
+      $("#main-disp").append('<input type=\"range\" id=\"rad-range\" max=\"' + configMap.disp_state.rad_max + '\" min=\"-' + configMap.disp_state.rad_max + '\" value=\"0\" step=\"' + configMap.disp_state.rad_range + '\"></input>');
+      $("#rad-range").on('input', onRadChange);
 
+      $(this)
+        .parent()
+        .find("#output-rad-range")
+        .text(configMap.disp_state.rad_range);
+    };
+
+    //
+    // -----------onDispRadRangeChange-------------end
+
+    // -----------onDispRadMaxChange-------------start
+    //
+    onDispRadMaxChange = function(e) {
+      configMap.disp_state.rad_max = $(this).val();
+      $("#rad-range").remove();
+      $("#main-disp").append('<input type=\"range\" id=\"rad-range\" max=\"' + configMap.disp_state.rad_max + '\" min=\"-' + configMap.disp_state.rad_max + '\" value=\"0\" step=\"' + configMap.disp_state.rad_range + '\"></input>');
+      $("#rad-range").on('input', onRadChange);
+
+      $(this)
+        .parent()
+        .find("#output-rad-max")
+        .text(configMap.disp_state.rad_max);
+    };
+
+    //
+    // -----------onDispRadMaxChange-------------end
+
+    // -----------changeMode---------------start
+    //
+
+    changeMode = function(e){
+      if(configMap.disp_state.mode === 0){
+        configMap.disp_state.mode = 1;
+        $("#main-disp-direction").css("transform", "rotate(" + 0 + "deg)");
+        $("#main-disp-window").css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
+      }else{
+        configMap.disp_state.mode = 0;
+        $("#main-disp-window").css("transform", "rotate(" + 0 + "deg)");
+        $("#main-disp-direction").css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
+      }
+    };
+
+    //
+    // -----------changeMode---------------end
 
     $container
-      .append('<div><textarea id="output-map-text" rows=\"16\" cols=\"36\"><\/textarea><\/div>')
+      .bind('click', navExtend)
       .find("#output-map")
         .bind('click', onOutputMap)
       .parents()
@@ -735,7 +827,16 @@ main.model = (function(){
         .on('input', onGramChange)
       .parents()
       .find("#_rebound-range")
-        .on('input', onReboundChange);
+        .on('input', onReboundChange)
+      .parents()
+      .find("#_rad-range")
+        .on('input', onDispRadRangeChange)
+      .parents()
+      .find("#_rad-max")
+        .on('input', onDispRadMaxChange)
+      .parents()
+      .find("#_turnMode")
+        .on('click', changeMode);
 
   };
 
@@ -1045,7 +1146,12 @@ main.model = (function(){
   //
     onRadChange = function(e){
       configMap.disp_state.rad = $(this).val();
-      $("#main-disp-window").css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
+      if(configMap.disp_state.mode == 1){
+        $("#main-disp-window").css("transform", "rotate(" + -1 * configMap.disp_state.rad + "deg)");
+      }else{
+        $("#main-disp-direction").css("transform", "rotate(" + -1 * configMap.disp_state.rad + "deg)");
+      }
+
     };
   //
   // --------------------onRadChange----------------------start
@@ -1120,7 +1226,7 @@ main.model = (function(){
         .css("margin", (-configMap.disp_state.wid/2) + " 0 0 " + (-configMap.disp_state.wid/2) )
         .animate({width: configMap.disp_state.wid + "px"}, 1000)
         .animate({height: configMap.disp_state.hei + "px" }, 1000)
-      .parent().next() //Footer
+      .parents().find("#main-disp").next() //Footer
         .animate({width: 100 + "%"}, 1000)
         .css("bottom","0")
         .animate({height: 100 + "px" }, {
