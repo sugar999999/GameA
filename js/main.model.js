@@ -16,7 +16,7 @@ main.model = (function(){
           + '<div id=\"RIGHT\">RIGHT<\/div>'
           + '<div id=\"BOTTOM\">▼<\/div>'
         + '<\/div><canvas id=\"main-disp-window\"><\/canvas>'
-        + '<input type=\"range\" id=\"rad-range\" max=\"180\" min=\"-180\" value=\"0\" step=\"45\"><\/input>'
+        + '<input type=\"range\" id=\"rad-range\" max=\"270\" min=\"-270\" value=\"0\" step=\"1\"><\/input>'
       + '<\/div>'
       + '<div id=\"footer\">Footer<\/div>'
       + '<div id=\"nav\">Nav'
@@ -31,12 +31,12 @@ main.model = (function(){
           + '<input type=\"range\" id=\"_rebound-range\" max=\"2.0" min=\"0\" step=\"0.1\" value=\"0\"><\/input>'
         + '<\/div>'
         + '<div id=\"disp-rad-range\">rad-range: '
-          + '<textarea id=\"output-rad-range\" rows=\"1\" cols=\"3\">45<\/textarea>'
-          + '<input type=\"range\" id=\"_rad-range\" max=\"90" min=\"1\" step=\"1\" value=\"45\"><\/input>'
+          + '<textarea id=\"output-rad-range\" rows=\"1\" cols=\"3\">1<\/textarea>'
+          + '<input type=\"range\" id=\"_rad-range\" max=\"90" min=\"1\" step=\"1\" value=\"1\"><\/input>'
         + '<\/div>'
         + '<div id=\"disp-rad-max-range\">rad-max: '
-          + '<textarea id=\"output-rad-max\" rows=\"1\" cols=\"3\">180<\/textarea>'
-          + '<input type=\"range\" id=\"_rad-max\" max=\"360" min=\"135\" step=\"45\" value=\"180\"><\/input>'
+          + '<textarea id=\"output-rad-max\" rows=\"1\" cols=\"3\">270<\/textarea>'
+          + '<input type=\"range\" id=\"_rad-max\" max=\"360" min=\"135\" step=\"45\" value=\"270\"><\/input>'
           + 'turnMode: <input type=\"checkbox\" id=\"_turnMode\"><\/input>'
         + '<\/div>'
         // testplaytools-------------------------end
@@ -131,7 +131,7 @@ main.model = (function(){
   },
   initModule, drawDisp, nav, onMouseMove, onMouseClick,
   mainCanvas, style, mainCont, onRadChange, updateStatus,
-  gameStart, warpArea;
+  gameStart, warpArea, onRadSlideReset;
   //
   // ------------------difine---------------------end
 
@@ -155,7 +155,10 @@ main.model = (function(){
           configMap.stage.state.isStarting.$effectContainer = $(this);
         }
       });
-    $("#rad-range").on('input', onRadChange);
+    $("#rad-range")
+      .on('mouseup', onRadSlideReset)
+      .on('input', onRadChange);
+
     configMap.stage.state.running = setInterval(drawDisp, 15);
   };
 
@@ -170,9 +173,12 @@ main.model = (function(){
     $("#rad-range").remove();
     if(configMap.disp_state.rad != 360 && configMap.disp_state.rad !== 0){
 
+      if(configMap.disp_state.mode == 0) var $target = $("#main-disp-window");
+      else var $target = $("#main-disp-direction");
+
         var dispreset = setInterval(function(){
           configMap.disp_state.rad++;
-          $("#main-disp-direction") //Window
+          $target //Window
           .css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
           if(configMap.disp_state.rad == 360 || configMap.disp_state.rad === 0)clearInterval(dispreset);
         }, 3);
@@ -804,12 +810,12 @@ main.model = (function(){
     //
 
     changeMode = function(e){
-      if(configMap.disp_state.mode === 0){
-        configMap.disp_state.mode = 1;
+      if(configMap.disp_state.mode == 1){
+        configMap.disp_state.mode = 0;
         $("#main-disp-direction").css("transform", "rotate(" + 0 + "deg)");
         $("#main-disp-window").css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
       }else{
-        configMap.disp_state.mode = 0;
+        configMap.disp_state.mode = 1;
         $("#main-disp-window").css("transform", "rotate(" + 0 + "deg)");
         $("#main-disp-direction").css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
       }
@@ -1146,15 +1152,32 @@ main.model = (function(){
   //
     onRadChange = function(e){
       configMap.disp_state.rad = $(this).val();
-      if(configMap.disp_state.mode == 1){
+      if(configMap.disp_state.mode == 0){
         $("#main-disp-window").css("transform", "rotate(" + 1 * configMap.disp_state.rad + "deg)");
       }else{
         $("#main-disp-direction").css("transform", "rotate(" + -1 * configMap.disp_state.rad + "deg)");
       }
 
+
+
+
     };
   //
   // --------------------onRadChange----------------------start
+  // -------------------onRadSlideReset-------------------start
+  //
+  onRadSlideReset = function(e){
+    if(configMap.disp_state.rad >= 180){
+      configMap.disp_state.rad -= 360;
+      $(this).val(configMap.disp_state.rad);
+    }else if(configMap.disp_state.rad <= -180){
+      configMap.disp_state.rad += 360;
+      $(this).val(configMap.disp_state.rad);
+    }
+
+  };
+  //
+  // -------------------onRadSlideReset-------------------end
 
   // --------------------onMouseMoveCanvas----------------------start
   //
