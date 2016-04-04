@@ -1147,7 +1147,7 @@ main.model = (function(){
     onRadChange = function(e){
       configMap.disp_state.rad = $(this).val();
       if(configMap.disp_state.mode == 1){
-        $("#main-disp-window").css("transform", "rotate(" + -1 * configMap.disp_state.rad + "deg)");
+        $("#main-disp-window").css("transform", "rotate(" + 1 * configMap.disp_state.rad + "deg)");
       }else{
         $("#main-disp-direction").css("transform", "rotate(" + -1 * configMap.disp_state.rad + "deg)");
       }
