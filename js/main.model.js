@@ -105,7 +105,8 @@ main.model = (function(){
       hei: 352,
       rad_range: 45,
       rad_max: 180,
-      mode: 0
+      mode: 0,
+      power: 0
     },
     ball_state: {
       X: 0,
@@ -126,7 +127,8 @@ main.model = (function(){
       gram: 1.5,
       powerX: 0,
       powerY: 0,
-      rebound: 0
+      rebound: 0,
+      friction: .005
     }
   },
   initModule, drawDisp, nav, onMouseMove, onMouseClick,
@@ -340,8 +342,9 @@ main.model = (function(){
     configMap.ball_state.vx = configMap.ball_state.X;
     configMap.ball_state.vy = configMap.ball_state.Y;
 
-    configMap.ball_state.speedX += Math.sin(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .05;
-    configMap.ball_state.speedY += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .05;
+
+    configMap.ball_state.speedX += Math.sin(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
+    configMap.ball_state.speedY += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
     if(configMap.ball_state.speedX >= configMap.block_size / 2)configMap.ball_state.speedX = configMap.block_size / 2;
     else if(configMap.ball_state.speedX <= -(configMap.block_size / 2))configMap.ball_state.speedX = -configMap.block_size / 2;
     if(configMap.ball_state.speedY >= configMap.block_size / 2)configMap.ball_state.speedY = configMap.block_size / 2;
@@ -671,18 +674,75 @@ main.model = (function(){
 
 
     if( configMap.ball_state.isOnWall[0] || configMap.ball_state.isOnWall[2] ){
-      configMap.ball_state.speedY = configMap.ball_state.speedY * -configMap.ball_state.rebound;
+      // 跳ね返り
+      configMap.ball_state.speedY += configMap.ball_state.speedY * -(1.0 - configMap.ball_state.rebound);
+
+      // 摩擦
+      if(configMap.ball_state.speedX > 0){
+        configMap.ball_state.speedX -= configMap.ball_state.friction;
+        if(configMap.ball_state.speedX < 0)configMap.ball_state.speedX = 0;
+      } else if(configMap.ball_state.speedX < 0){
+        configMap.ball_state.speedX += configMap.ball_state.friction;
+        if(configMap.ball_state.speedX > 0)configMap.ball_state.speedX = 0;
+      }
+
+      if( configMap.ball_state.isOnWall[0] && configMap.ball_state.X > mainCanvas.width / 2){
+        if(configMap.disp_state.power > 15){ //右回転
+          configMap.ball_state.speedY += configMap.disp_state.power * ( 1 - configMap.ball_state.gram * .01 );
+        }
+      } else if( configMap.ball_state.isOnWall[0] && configMap.ball_state.X < mainCanvas.width / 2) {
+        if(configMap.disp_state.power < -15){ //左回転
+          configMap.ball_state.speedY += -configMap.disp_state.power * ( 1 - configMap.ball_state.gram * .01 );
+        }
+      } else if( configMap.ball_state.isOnWall[2] && configMap.ball_state.X < mainCanvas.width / 2){
+        if(configMap.disp_state.power > 15){ //右回転
+          configMap.ball_state.speedY += -configMap.disp_state.power * ( 1 - configMap.ball_state.gram * .01 );
+        }
+      } else if( configMap.ball_state.isOnWall[2] && configMap.ball_state.X > mainCanvas.width / 2) {
+        if(configMap.disp_state.power < -15){ //左回転
+          configMap.ball_state.speedY += configMap.disp_state.power * ( 1 - configMap.ball_state.gram * .01 );
+        }
+      }
+
       if(configMap.ball_state.rebound > 0.5)configMap.ball_state.rebound -= .01
 
     }
     if( configMap.ball_state.isOnWall[1] || configMap.ball_state.isOnWall[3] ){
-      configMap.ball_state.speedX = configMap.ball_state.speedX * -configMap.ball_state.rebound;
+      // 跳ね返り
+      configMap.ball_state.speedX += configMap.ball_state.speedX * -(1.0 - configMap.ball_state.rebound);
+      // 摩擦
+      if(configMap.ball_state.speedY > 0){
+        configMap.ball_state.speedY -= configMap.ball_state.friction;
+        if(configMap.ball_state.speedY < 0)configMap.ball_state.speedY = 0;
+      } else if(configMap.ball_state.speedY < 0){
+        configMap.ball_state.speedY += configMap.ball_state.friction;
+        if(configMap.ball_state.speedY > 0)configMap.ball_state.speedY = 0;
+      }
+
+      if(configMap.ball_state.isOnWall[3]　&& configMap.ball_state.Y < mainCanvas.height / 2){
+        if(configMap.disp_state.power > 15){ //右回転
+          configMap.ball_state.speedX += configMap.disp_state.power * ( 1 - configMap.ball_state.gram * .01 );
+        }
+      } else if(configMap.ball_state.isOnWall[3] && configMap.ball_state.Y > mainCanvas.height / 2) {
+        if(configMap.disp_state.power < -15){ //左回転
+          configMap.ball_state.speedX += -configMap.disp_state.power * ( 1 - configMap.ball_state.gram * .01 );
+        }
+      } else if(configMap.ball_state.isOnWall[1]　&& configMap.ball_state.Y < mainCanvas.height / 2){
+        if(configMap.disp_state.power < -15){ //左回転
+          configMap.ball_state.speedX += configMap.disp_state.power * ( 1 - configMap.ball_state.gram * .01 );
+        }
+      } else if(configMap.ball_state.isOnWall[1] && configMap.ball_state.Y > mainCanvas.height / 2) {
+        if(configMap.disp_state.power > 15){ //右回転
+          configMap.ball_state.speedX += -configMap.disp_state.power * ( 1 - configMap.ball_state.gram * .01 );
+        }
+      }
+
       if(configMap.ball_state.rebound > 0.5)configMap.ball_state.rebound -= .01
 
     }
 
     for(var i = 0; i < 4; i++)configMap.ball_state.isOnWall[i] = false;
-
+    configMap.disp_state.power = 0;
     // ボールの位置を移動
     configMap.ball_state.X = configMap.ball_state.vx;
     configMap.ball_state.Y = configMap.ball_state.vy;
@@ -1150,29 +1210,31 @@ main.model = (function(){
 
   // --------------------onRadChange----------------------start
   //
-    onRadChange = function(e){
-      configMap.disp_state.rad = $(this).val();
-      if(configMap.disp_state.mode == 0){
-        $("#main-disp-window").css("transform", "rotate(" + 1 * configMap.disp_state.rad + "deg)");
-      }else{
-        $("#main-disp-direction").css("transform", "rotate(" + -1 * configMap.disp_state.rad + "deg)");
-      }
+  onRadChange = function(e){
+    //configMap.disp_state.power = configMap.disp_state.power - ($(this).val() - configMap.disp_state.rad) <= 0 ? $(this).val() - configMap.disp_state.rad : 0 ;
+    configMap.disp_state.power = $(this).val() - configMap.disp_state.rad;
+    configMap.disp_state.rad = $(this).val();
+    if(configMap.disp_state.mode == 0){
+      $("#main-disp-window").css("transform", "rotate(" + 1 * configMap.disp_state.rad + "deg)");
+    }else{
+      $("#main-disp-direction").css("transform", "rotate(" + -1 * configMap.disp_state.rad + "deg)");
+    }
 
-
-
-
-    };
+  };
   //
   // --------------------onRadChange----------------------start
   // -------------------onRadSlideReset-------------------start
   //
   onRadSlideReset = function(e){
-    if(configMap.disp_state.rad >= 180){
-      configMap.disp_state.rad -= 360;
-      $(this).val(configMap.disp_state.rad);
-    }else if(configMap.disp_state.rad <= -180){
-      configMap.disp_state.rad += 360;
-      $(this).val(configMap.disp_state.rad);
+    configMap.disp_state.rad = 0;
+    configMap.disp_state.power = configMap.disp_state.rad - $(this).val();
+    $(this)
+      .val(configMap.disp_state.rad);
+
+    if(configMap.disp_state.mode == 0){
+      $("#main-disp-window").css("transform", "rotate(" + 1 * configMap.disp_state.rad + "deg)");
+    }else{
+      $("#main-disp-direction").css("transform", "rotate(" + -1 * configMap.disp_state.rad + "deg)");
     }
 
   };
