@@ -675,7 +675,7 @@ main.model = (function(){
 
     if( configMap.ball_state.isOnWall[0] || configMap.ball_state.isOnWall[2] ){
       // 跳ね返り
-      configMap.ball_state.speedY += configMap.ball_state.speedY * -(1.0 - configMap.ball_state.rebound);
+      configMap.ball_state.speedY *= -(configMap.ball_state.rebound);
 
       // 摩擦
       if(configMap.ball_state.speedX > 0){
@@ -709,7 +709,7 @@ main.model = (function(){
     }
     if( configMap.ball_state.isOnWall[1] || configMap.ball_state.isOnWall[3] ){
       // 跳ね返り
-      configMap.ball_state.speedX += configMap.ball_state.speedX * -(1.0 - configMap.ball_state.rebound);
+      configMap.ball_state.speedX *= -(configMap.ball_state.rebound);
       // 摩擦
       if(configMap.ball_state.speedY > 0){
         configMap.ball_state.speedY -= configMap.ball_state.friction;
