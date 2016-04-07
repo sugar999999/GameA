@@ -111,6 +111,21 @@ body{
   z-index: 2;
 }
 
+#main-disp-status {
+  position: absolute;
+  top: 100px;
+  left: 80%;
+  background: transparent;
+  border: 2px #ddd solid;
+  border-radius: 5px;
+  z-index: 2;
+  font: 800 15px/15px Arial;
+  text-align: left;
+}
+#main-disp-status span{
+
+}
+
 #footer {
   position: absolute;
   top: 556px;
