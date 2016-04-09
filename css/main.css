@@ -49,6 +49,10 @@ body{
   border: 1px #ddd solid;
 }
 
+#main-disp-direction div:hover{
+  cursor: default;
+}
+
 #main-disp-direction{
   position: absolute;
   top: 50%;
@@ -98,6 +102,10 @@ body{
   width: 400px;
   margin-left: -200px;
   z-index: 3;
+}
+
+#main-disp-window:hover{
+  cursor: pointer;
 }
 
 #main-disp-window {

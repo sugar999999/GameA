@@ -130,7 +130,8 @@ main.model = (function(){
       powerY: 0,
       rebound: 0,
       friction: .005
-    }
+    },
+    game_mode: null
   },
   initModule, drawDisp, nav, onMouseMove, onMouseClick,
   mainCanvas, style, mainCont, onRadChange, updateStatus,
@@ -813,7 +814,7 @@ main.model = (function(){
       if(pos == "0px"){
         $(this).animate({bottom: -45 + "%"},30);
         clearInterval(configMap.stage.state.running);
-        configMap.stage.state.running = setInterval(drawDisp, 30);
+        if(configMap.game_mode == 'game')configMap.stage.state.running = setInterval(drawDisp, 30);
       }else{
         clearInterval(configMap.stage.state.running);
         delete configMap.stage.state.running;
@@ -845,6 +846,8 @@ main.model = (function(){
         $output.append(']');
 
       }
+
+      return false;
     };
     //
     // -----------onOutputMap------------end
@@ -859,6 +862,7 @@ main.model = (function(){
         .find("#output-gram")
         .text(configMap.ball_state.gram);
 
+      return false;
     };
     //
     // --------onGramChange----------end
@@ -873,6 +877,7 @@ main.model = (function(){
         .find("#output-rebound")
         .text(configMap.ball_state.rebound);
 
+      return false;
     };
     //
     // --------onReboundChange----------end
@@ -889,6 +894,8 @@ main.model = (function(){
         .parent()
         .find("#output-rad-range")
         .text(configMap.disp_state.rad_range);
+
+      return false;
     };
 
     //
@@ -906,6 +913,8 @@ main.model = (function(){
         .parent()
         .find("#output-rad-max")
         .text(configMap.disp_state.rad_max);
+
+      return false;
     };
 
     //
@@ -924,6 +933,7 @@ main.model = (function(){
         $("#main-disp-window").css("transform", "rotate(" + 0 + "deg)");
         $("#main-disp-direction").css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
       }
+
     };
 
     //
@@ -1341,11 +1351,11 @@ main.model = (function(){
 
   // --------------------initModule----------------------start
   //
-  initModule = function($container){
-
+  initModule = function($container, mode){
+    configMap.game_mode = mode;
     // メイン要素の描画
     $container
-      .append(configMap.main_html)
+      .html(configMap.main_html)
       .find("#header")
         .animate({width: 100 + "%"}, 1000)
         .animate({height: 50 + "px"}, 1000)
@@ -1362,19 +1372,23 @@ main.model = (function(){
         .animate({height: 100 + "px" }, {
           duration: "1000",
           complete: function(){
-            main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, 1);
-            gameStart();
+            // エレメント取得
+            mainCanvas = document.getElementById("main-disp-window");
+            if(mode == 'game'){
+              main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, 1);
+              gameStart();
+            } else if(mode == 'edit'){
+              $("#rad-range").remove();
+              mainCanvas.addEventListener('mousemove', onMouseMoveCanvas, false);
+              mainCanvas.addEventListener('mousedown', onMouseClickCanvas, false);
+            }
           }
         });
 
     // 要素の追加
     nav( $("#nav") );
 
-    // エレメント取得
-    mainCanvas = document.getElementById("main-disp-window");
-    // イベントバインド
-    mainCanvas.addEventListener('mousemove', onMouseMoveCanvas, false);
-    mainCanvas.addEventListener('mousedown', onMouseClickCanvas, false);
+
 
 
   };

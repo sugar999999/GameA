@@ -80,7 +80,34 @@ main.start = (function(){
   //
   initModule = function($container){
 
-    main.model.initModule( $container );
+    var gameMode, editMode;
+
+    gameMode = function(){
+      main.model.initModule( $container, 'game' );
+    };
+
+    editMode = function(){
+      main.model.initModule( $container, 'edit' );
+    };
+
+    $container
+      .html('<div id=\"title\">STILL BALL RUN<\/div><div id=\"title-menu\"><\/div>')
+      .find("#title")
+      .animate({height: 200 + "px"}, {
+        duration: "1500",
+        complete: function(){
+          $(this)
+            .next()
+            .html('<span id=\"game\">GAME START<\/span><br><span id=\"edit\">EDIT MODE<\/span>')
+            .find("#game")
+            .bind('click', gameMode)
+            .next().next()
+            .bind('click', editMode)
+            .parent()
+            .css("height", "200px");
+
+        }});
+
 
     $.uriAnchor.configModule({
       schema_map : configMap.anchor_schema_map
