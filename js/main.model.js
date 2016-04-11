@@ -231,6 +231,7 @@ main.model = (function(){
     if(direction == "U" || direction == "D")$("#main-disp-window").animate({height: 0 + "px"}, {
         duration: "1000",
         complete: function(){
+          main.stagelist.saveMap(configMap.stage, "_" + configMap.stage.state.now_stage, configMap.stage.state.now_area);
           main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, no);
           drawDisp();
           $(this) //Window
@@ -249,6 +250,7 @@ main.model = (function(){
     else $("#main-disp-window").animate({width: 0 + "px" },{
         duration: "1000",
         complete: function(){
+          main.stagelist.saveMap(configMap.stage, "_" + configMap.stage.state.now_stage, configMap.stage.state.now_area);
           main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, no);
           drawDisp();
           $(this) //Window
@@ -334,8 +336,18 @@ main.model = (function(){
       } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -12){ // double
         configMap.ball_state.gravity *= 2;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
+  
+      // radius change item
+      } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -13){ // small
+        configMap.ball_state.radius = 4;
+        configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
+      } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -14){ // normal
+        configMap.ball_state.radius = 8;
+        configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
+      } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -15){ // big
+        configMap.ball_state.radius = 10;
+        configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
       }
-
     }
 
 
@@ -1193,6 +1205,36 @@ main.model = (function(){
             if(configMap.stage.map[i][j] == -10)mainCont.strokeText("↑↑↓↓", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
             else if(configMap.stage.map[i][j] == -11)mainCont.strokeText("↓↓/2", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
             else if(configMap.stage.map[i][j] == -12)mainCont.strokeText("↓↓x2", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 11);
+
+          } else if(configMap.stage.map[i][j] >= -15){
+
+            //radius change item
+            if(!configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]]){
+              configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]] = 12;
+
+              mainCont.fillStyle = "#"
+                                    + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                    + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                    + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16);
+
+            } else {
+              if(configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]] >= 1){
+                configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]]--;
+
+                mainCont.fillStyle = "#"
+                                      + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                      + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                      + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16);
+              } else {
+                delete configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]];
+              }
+
+            }
+
+            if(configMap.stage.map[i][j] == -13)mainCont.strokeText("●→S", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            else if(configMap.stage.map[i][j] == -14)mainCont.strokeText("●→M", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            else if(configMap.stage.map[i][j] == -15)mainCont.strokeText("●→L", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
             mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 11);
 
           }
