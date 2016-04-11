@@ -336,16 +336,16 @@ main.model = (function(){
       } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -12){ // double
         configMap.ball_state.gravity *= 2;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
-  
+
       // radius change item
       } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -13){ // small
-        configMap.ball_state.radius = 4;
+        configMap.ball_state.radius = 3;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
       } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -14){ // normal
-        configMap.ball_state.radius = 8;
+        configMap.ball_state.radius = 7;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
       } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -15){ // big
-        configMap.ball_state.radius = 10;
+        configMap.ball_state.radius = 9;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
       }
     }
@@ -368,8 +368,8 @@ main.model = (function(){
 
     configMap.ball_state.vx += configMap.ball_state.speedX;
     configMap.ball_state.vy += configMap.ball_state.speedY;
-    configMap.ball_state.powerX = Math.abs(configMap.ball_state.gram * configMap.ball_state.speedX);
-    configMap.ball_state.powerY = Math.abs(configMap.ball_state.gram * configMap.ball_state.speedY);
+    configMap.ball_state.powerX = Math.abs(configMap.ball_state.gram * configMap.ball_state.speedX) * (configMap.ball_state.radius / 10);
+    configMap.ball_state.powerY = Math.abs(configMap.ball_state.gram * configMap.ball_state.speedY) * (configMap.ball_state.radius / 10);
 
     // 「mainCanvas」からスケールアウトしないように値を調整。
     if(configMap.ball_state.vx < configMap.ball_state.radius){
