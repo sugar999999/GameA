@@ -384,7 +384,55 @@ main.model = (function(){
       } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -15){ // big
         configMap.ball_state.radius = 9;
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
+
+      // gram burst
+      } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -16){ // kg burst
+        if(!configMap.ball_state.gram_burst){
+          var _gram = configMap.ball_state.gram, gram = 0;
+          configMap.ball_state.gram_burst = setInterval(function(){
+            configMap.ball_state.gram += .1;
+            gram += .1;
+            if(gram > 20){
+              clearInterval(configMap.ball_state.gram_burst);
+              configMap.ball_state.gram_burst = setInterval(function(){
+                configMap.ball_state.gram -= .1;
+                if(configMap.ball_state.gram <= _gram){
+                  configMap.ball_state.gram　= _gram;
+                  clearInterval(configMap.ball_state.gram_burst);
+                  delete configMap.ball_state.gram_burst;
+                }
+              },15);
+            }
+          },15);
+          configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
+        }
+
+      } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -17){ // kg super burst
+        if(!configMap.ball_state.gram_burst){
+          var _gram = configMap.ball_state.gram, gram = 0;
+          configMap.ball_state.gram_burst = setInterval(function(){
+            configMap.ball_state.gram += .1;
+            gram += .1;
+            if(configMap.ball_state.gram > 59.9)configMap.ball_state.gram = 60;
+            if(gram > 40){
+              clearInterval(configMap.ball_state.gram_burst);
+              configMap.ball_state.gram_burst = setInterval(function(){
+                configMap.ball_state.gram -= .1;
+                if(configMap.ball_state.gram <= _gram){
+                  configMap.ball_state.gram　= _gram;
+                  clearInterval(configMap.ball_state.gram_burst);
+                  delete configMap.ball_state.gram_burst;
+                }
+              },15);
+            }
+          },15);
+          configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
+        }
+
       }
+
+
+
     }
 
 
@@ -1246,9 +1294,9 @@ main.model = (function(){
 
             }
 
-            if(configMap.stage.map[i][j] == -10)mainCont.strokeText("↑↑↓↓", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
-            else if(configMap.stage.map[i][j] == -11)mainCont.strokeText("↓↓/2", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
-            else if(configMap.stage.map[i][j] == -12)mainCont.strokeText("↓↓x2", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            if(configMap.stage.map[i][j] == -10)mainCont.strokeText("G↑↓", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            else if(configMap.stage.map[i][j] == -11)mainCont.strokeText("G↓/2", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            else if(configMap.stage.map[i][j] == -12)mainCont.strokeText("G↓x2", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
             mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 11);
 
           } else if(configMap.stage.map[i][j] >= -15){
@@ -1279,6 +1327,35 @@ main.model = (function(){
             if(configMap.stage.map[i][j] == -13)mainCont.strokeText("●→S", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
             else if(configMap.stage.map[i][j] == -14)mainCont.strokeText("●→M", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
             else if(configMap.stage.map[i][j] == -15)mainCont.strokeText("●→L", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 11);
+
+          } else if(configMap.stage.map[i][j] >= -17){
+
+            //radius change item
+            if(!configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]]){
+              configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]] = 12;
+
+              mainCont.fillStyle = "#"
+                                    + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                    + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                    + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16);
+
+            } else {
+              if(configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]] >= 1){
+                configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]]--;
+
+                mainCont.fillStyle = "#"
+                                      + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                      + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16)
+                                      + configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]].toString(16);
+              } else {
+                delete configMap.stage.state.itemGcolor["itemNo" + -configMap.stage.map[i][j]];
+              }
+
+            }
+
+            if(configMap.stage.map[i][j] == -16)mainCont.strokeText("☆kg", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
+            if(configMap.stage.map[i][j] == -17)mainCont.strokeText("★kg", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size);
             mainCont.strokeText("▼", j * configMap.block_size + ( configMap.block_size / 2 ), i * configMap.block_size + 11);
 
           }
@@ -1325,6 +1402,8 @@ main.model = (function(){
                             + ((5 - Math.floor(configMap.ball_state.gram / 5)).toString(16));
       }
 
+      if(configMap.ball_state.gram_burst)mainCont.strokeStyle = "#b00";
+
       mainCont.lineWidth = 2;
       mainCont.lineJoin = "bavel";
 
@@ -1349,7 +1428,7 @@ main.model = (function(){
 
     //draw status
     $("#header")
-      .html('<span>≪| </span>:' + Math.floor(configMap.ball_state.rebound*10*100)/100 + '%, <span>↓↓</span> x' + Math.floor(configMap.ball_state.gravity/9.8 * 100) + '%, <span>kg</span>:' + configMap.ball_state.gram +'kg');
+      .html('<span>≪|</span>:' + Math.floor(configMap.ball_state.rebound*10*100)/100 + '%, <span>G↓</span> x' + Math.floor(configMap.ball_state.gravity/9.8 * 100) + '%, <span>kg</span>:' + Math.floor(configMap.ball_state.gram * 10)/10 +'kg');
 
 
   };
