@@ -122,7 +122,7 @@ main.start = (function(){
 
     if(!stateMap.anchor_map.mode || !stateMap.anchor_map.stage || !stateMap.anchor_map.area || !stateMap.anchor_map.pass){
       $container
-        .html('<div id=\"title\">A MAZE IN BALL RUNNNIG<\/div><div id=\"title-menu\"><\/div>')
+        .html('<div id=\"title\">SPIN MAZE RUNNER<\/div><div id=\"title-menu\"><\/div>')
         .find("#title")
         .animate({height: 200 + "px"}, {
           duration: "1500",

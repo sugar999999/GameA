@@ -8,8 +8,8 @@ main.model = (function(){
   //
   var configMap = {
     main_html: String()
-      + '<div id=\"header\">- A MAZE IN BALL RUNNNIG -<\/div>'
-      + '<div id=\"main-disp\">Main'
+      + '<div id=\"header\">- SPIN MAZE RUNNER -<\/div>'
+      + '<div id=\"main-disp\">'
         + '<div id=\"main-disp-direction\">'
         + '<\/div><canvas id=\"main-disp-window\"><\/canvas>'
         + '<input type=\"range\" id=\"rad-range\" max=\"270\" min=\"-270\" value=\"0\" step=\"1\"><\/input>'
@@ -100,8 +100,8 @@ main.model = (function(){
       rad: 0,
       wid: 352,
       hei: 352,
-      rad_range: 45,
-      rad_max: 180,
+      rad_range: 1,
+      rad_max: 270,
       mode: 0,
       power: 0
     },
@@ -172,7 +172,13 @@ main.model = (function(){
     configMap.ball_state.Y = (configMap.stage.start.row * configMap.block_size) + (configMap.block_size / 2);
     configMap.ball_state.col = Math.floor(configMap.ball_state.X / configMap.block_size);
     configMap.ball_state.row = Math.floor(configMap.ball_state.Y / configMap.block_size);
+    configMap.ball_state.gram = 1.5;
+    configMap.ball_state.gravity = 9.8;
+    configMap.ball_state.rebound = .1;
     configMap.stage.state.isStarting = {};
+
+    $("#main-disp").append("Stage " + configMap.stage.state.now_stage);
+
     $("#main")
       .append(configMap.stageStart_html)
       .find("#stageStart-effect")
@@ -254,37 +260,39 @@ main.model = (function(){
     clearInterval(configMap.stage.state.running);
     delete configMap.stage.state.running;
     if(direction == "U" || direction == "D")$("#main-disp-window").animate({height: 0 + "px"}, {
-        duration: "1000",
+        duration: 10,
         complete: function(){
           main.stagelist.saveMap(configMap.stage, "_" + configMap.stage.state.now_stage, configMap.stage.state.now_area);
           main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, no);
           drawDisp();
           $(this) //Window
             .animate({height: configMap.disp_state.hei + "px" },{
-              duration: "1000",
+              duration: 10,
               complete: function(){
-                if(direction == "U")configMap.ball_state.Y = (Math.abs(configMap.ball_state.row - configMap.stage.map.length) * configMap.block_size) - (configMap.ball_state.radius + 1);
-                else if(direction == "D")configMap.ball_state.Y = (Math.abs(configMap.ball_state.row - configMap.stage.map.length) * configMap.block_size) + (configMap.ball_state.radius + 1);
-
                 configMap.stage.state.running = setInterval(drawDisp, 30);
+                if(direction == "U")configMap.ball_state.Y = (Math.abs(configMap.ball_state.row - (configMap.stage.map.length)) * configMap.block_size) - (configMap.ball_state.radius + 1);
+                else if(direction == "D")configMap.ball_state.Y = (Math.abs(configMap.ball_state.row - (configMap.stage.map.length-1)) * configMap.block_size) + (configMap.ball_state.radius + 1);
+
+
               }
             });
 
         }
       });
     else $("#main-disp-window").animate({width: 0 + "px" },{
-        duration: "1000",
+        duration: 10,
         complete: function(){
           main.stagelist.saveMap(configMap.stage, "_" + configMap.stage.state.now_stage, configMap.stage.state.now_area);
           main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, no);
           drawDisp();
           $(this) //Window
             .animate({width: configMap.disp_state.hei + "px" },{
-              duration: "1000",
+              duration: 10,
               complete: function(){
-                if(direction == "L")configMap.ball_state.X = (Math.abs(configMap.ball_state.col - configMap.stage.map[0].length) * configMap.block_size) + (configMap.ball_state.radius + 1);
-                else if(direction == "R")configMap.ball_state.X = (Math.abs(configMap.ball_state.col - 15) * configMap.stage.map[0].length) - (configMap.ball_state.radius + 1);
                 configMap.stage.state.running = setInterval(drawDisp, 30);
+                if(direction == "L")configMap.ball_state.X = (Math.abs(configMap.ball_state.col - configMap.stage.map[0].length) * configMap.block_size) + (configMap.ball_state.radius + 1);
+                else if(direction == "R")configMap.ball_state.X = (Math.abs(configMap.ball_state.col - (configMap.stage.map[0].length-1)) * configMap.block_size) - (configMap.ball_state.radius + 1);
+
               }
             });
 
@@ -1298,10 +1306,16 @@ main.model = (function(){
       reset();
     } else if(!configMap.stage.state.isStarting && configMap.stage.state.running){
       updateStatus();
+      if(Math.floor(configMap.ball_state.gram / 3) >= 12){ //frame color
+        mainCont.fillStyle = "#700";
+      } else if(Math.floor(configMap.ball_state.gram / 3) >= 10) {
+        mainCont.fillStyle = "#620";
+      } else {
       mainCont.fillStyle = "#" //inner color
                           + ((12 - Math.floor(configMap.ball_state.gram / 3)).toString(16))
                           + ((12 - Math.floor(configMap.ball_state.gram / 3)).toString(16))
                           + ((12 - Math.floor(configMap.ball_state.gram / 3)).toString(16));
+      }
 
       if(Math.floor(configMap.ball_state.gram / 5) >= 5){ //frame color
         mainCont.strokeStyle = "#000";
@@ -1333,7 +1347,9 @@ main.model = (function(){
 
     }
 
-
+    //draw status
+    $("#header")
+      .html('<span>≪| </span>:' + Math.floor(configMap.ball_state.rebound*10*100)/100 + '%, <span>↓↓</span> x' + Math.floor(configMap.ball_state.gravity/9.8 * 100) + '%, <span>kg</span>:' + configMap.ball_state.gram +'kg');
 
 
   };
