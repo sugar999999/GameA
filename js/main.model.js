@@ -8,18 +8,14 @@ main.model = (function(){
   //
   var configMap = {
     main_html: String()
-      + '<div id=\"header\">Game<\/div>'
+      + '<div id=\"header\">- A MAZE IN BALL RUNNNIG -<\/div>'
       + '<div id=\"main-disp\">Main'
         + '<div id=\"main-disp-direction\">'
-          + '<div id=\"TOP\">TOP<\/div>'
-          + '<div id=\"LEFT\">LEFT<\/div>'
-          + '<div id=\"RIGHT\">RIGHT<\/div>'
-          + '<div id=\"BOTTOM\">▼<\/div>'
         + '<\/div><canvas id=\"main-disp-window\"><\/canvas>'
         + '<input type=\"range\" id=\"rad-range\" max=\"270\" min=\"-270\" value=\"0\" step=\"1\"><\/input>'
         + '<div id=\"main-disp-status\"><\/div>'
       + '<\/div>'
-      + '<div id=\"footer\">Footer<\/div>'
+      + '<div id=\"footer\">Copyright by Sugar999<\/div>'
       + '<div id=\"nav\">Nav'
         + '<div id=\"output-map\"> << </div>'
         // testplaytools-------------------------start
@@ -128,7 +124,7 @@ main.model = (function(){
       gram: 1.5,
       powerX: 0,
       powerY: 0,
-      rebound: 0,
+      rebound: 0.1,
       friction: .005
     },
     game_mode: null
@@ -180,7 +176,7 @@ main.model = (function(){
     $("#main")
       .append(configMap.stageStart_html)
       .find("#stageStart-effect")
-      .text("Stage" + configMap.stage.state.now_stage)
+      .text("Stage " + configMap.stage.state.now_stage)
       .animate({left: 50 + "%"}, {
         duration: "300",
         complete: function(){
@@ -219,7 +215,7 @@ main.model = (function(){
     $("#main")
       .append(configMap.goal_html)
       .find("#goal-effect")
-      .text("Stage" + configMap.stage.state.now_stage +"\nCLEAR")
+      .text("Stage " + configMap.stage.state.now_stage +"\nCLEAR")
       .animate({left: 50 + "%"}, 300);
     $("#main-disp-window") //Window
       .animate({height: 0 + "px"}, 1000)
@@ -971,10 +967,15 @@ main.model = (function(){
     changeMode = function(e){
       if(configMap.disp_state.mode == 1){
         configMap.disp_state.mode = 0;
+        $("#main-disp-direction").html('');
         $("#main-disp-direction").css("transform", "rotate(" + 0 + "deg)");
         $("#main-disp-window").css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
       }else{
         configMap.disp_state.mode = 1;
+        $("#main-disp-direction").html('<div id=\"TOP\">TOP<\/div>'
+          + '<div id=\"LEFT\">LEFT<\/div>'
+          + '<div id=\"RIGHT\">RIGHT<\/div>'
+          + '<div id=\"BOTTOM\">▼<\/div>');
         $("#main-disp-window").css("transform", "rotate(" + 0 + "deg)");
         $("#main-disp-direction").css("transform", "rotate(" + configMap.disp_state.rad + "deg)");
       }
@@ -1021,7 +1022,7 @@ main.model = (function(){
     // ---------------canvas px adapt------------------end
     mainCont = mainCanvas.getContext("2d");
 
-    // 初回のみの演出
+    // ステージスタート時の初回のみの演出
     // ボールの描画
     reset = function(){
       if(configMap.stage.state.isStarting.reset < 360){
@@ -1047,12 +1048,14 @@ main.model = (function(){
         mainCont.stroke();
 
         // draw goal
-        mainCont.fillStyle = "#d00";
-        mainCont.strokeStyle = "#500";
-        mainCont.beginPath();
-        mainCont.arc((configMap.stage.goal.col * configMap.block_size) + configMap.block_size / 2, (configMap.stage.goal.row * configMap.block_size) + configMap.block_size / 2, configMap.ball_state.radius, 0, (Math.PI*2) * (configMap.stage.state.isStarting.reset / 360), false);
-        mainCont.fill();
-        mainCont.stroke();
+        if(configMap.stage.goal.area == configMap.stage.state.now_area){
+          mainCont.fillStyle = "#d00";
+          mainCont.strokeStyle = "#500";
+          mainCont.beginPath();
+          mainCont.arc((configMap.stage.goal.col * configMap.block_size) + configMap.block_size / 2, (configMap.stage.goal.row * configMap.block_size) + configMap.block_size / 2, configMap.ball_state.radius, 0, (Math.PI*2) * (configMap.stage.state.isStarting.reset / 360), false);
+          mainCont.fill();
+          mainCont.stroke();
+        }
       } else {
         configMap.stage.state.isStarting.$effectContainer
           .animate({left: 150 + "%"}, {

@@ -12,9 +12,9 @@
    margin: -100px 0 0 -200px;
    background:transparent;
    text-align: center;
-   font: italic 800 100px/100px Arial, Times, sans-serif;
-   transform: rotate(-15deg);
-   color: #a00;
+   font: 300 100px/100px 'Georgia';
+   transform: rotate(0deg);
+   color: #100;
    text-shadow:
 		-2px -2px #fff,
 		2px -2px #fff,
@@ -34,7 +34,7 @@
    width: 400px;
    height: 0px;
    text-align: center;
-   font: italic 800 50px/50px Arial, Times, sans-serif;
+   font: 300 50px/50px 'Impact';
    color: #a00;
    text-shadow:
     -2px -2px #fff,
@@ -55,6 +55,7 @@
    text-align: center;
    line-height: 100px;
    color: #ddd;
+   font-size: 2em;
  }
  #title-menu span:hover{
      cursor: pointer;
