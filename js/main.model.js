@@ -133,11 +133,37 @@ main.model = (function(){
     },
     game_mode: null
   },
+
+
   initModule, drawDisp, nav, onMouseMove, onMouseClick,
   mainCanvas, style, mainCont, onRadChange, updateStatus,
   gameStart, warpArea, onRadSlideReset;
+
   //
   // ------------------difine---------------------end
+
+  // ------------------uriAnchorManage---------------start
+  //
+  uriAnchorManage = function() {
+
+    main.start.changeAnchorSchema('mode', configMap.game_mode);
+    main.start.changeAnchorSchema('stage', configMap.stage.state.now_stage);
+    main.start.changeAnchorSchema('area', configMap.stage.state.now_area);
+    main.start.changeAnchorSchema('col', configMap.ball_state.col);
+    main.start.changeAnchorSchema('row', configMap.ball_state.row);
+    main.start.changeAnchorSchema('pass', configMap.stage.map.toString(16));
+
+    main.start.changeAnchorPart({
+      mode: configMap.game_mode,
+      stage: configMap.stage.state.now_stage,
+      area: configMap.stage.state.now_area,
+      col: configMap.ball_state.col,
+      row: configMap.ball_state.row,
+      pass: configMap.stage.map.toString(16)
+    });
+  };
+  //
+  // ------------------uriAnchorManage---------------end
 
   // --------------------gameStart----------------------start
   //
@@ -148,6 +174,8 @@ main.model = (function(){
     configMap.ball_state.speedY = 0;
     configMap.ball_state.X = (configMap.stage.start.col * configMap.block_size) + (configMap.block_size / 2);
     configMap.ball_state.Y = (configMap.stage.start.row * configMap.block_size) + (configMap.block_size / 2);
+    configMap.ball_state.col = Math.floor(configMap.ball_state.X / configMap.block_size);
+    configMap.ball_state.row = Math.floor(configMap.ball_state.Y / configMap.block_size);
     configMap.stage.state.isStarting = {};
     $("#main")
       .append(configMap.stageStart_html)
@@ -164,6 +192,7 @@ main.model = (function(){
       .on('input', onRadChange);
 
     configMap.stage.state.running = setInterval(drawDisp, 15);
+    uriAnchorManage();
   };
 
   //
@@ -265,6 +294,8 @@ main.model = (function(){
 
         }
       });
+
+
   }
   //
   // -----------------------warpArea-----------------------end
@@ -272,6 +303,8 @@ main.model = (function(){
   // --------------------updateStatus----------------------start
   //
   updateStatus = function(){
+
+
 
     // ボールの現在位置ブロックを算出
     configMap.ball_state.col = Math.floor(configMap.ball_state.X / configMap.block_size);
@@ -1368,6 +1401,7 @@ main.model = (function(){
       if(e.buttons == 1 && !(configMap.mouse._Col == configMap.mouse.col && configMap.mouse._Row == configMap.mouse.row) ){
         configMap.stage.map[configMap.mouse.row][configMap.mouse.col] = configMap.mouse.swit;
         drawDisp();
+        uriAnchorManage();
         configMap.mouse._Col = configMap.mouse.col;
         configMap.mouse._Row = configMap.mouse.row;
       } else {
@@ -1376,6 +1410,8 @@ main.model = (function(){
       }
 
     }
+
+
   };
   //
   // --------------------onMouseMoveCanvas----------------------end
@@ -1383,9 +1419,9 @@ main.model = (function(){
   // --------------------onMouseClickCanvas----------------------start
   //
   onMouseClickCanvas = function(e){
-    if(configMap.stage.map[configMap.mouse.row][configMap.mouse.col] === 0)configMap.stage.map[configMap.mouse.row][configMap.mouse.col] = 1;
-    else configMap.stage.map[configMap.mouse.row][configMap.mouse.col] = 0;
+    configMap.stage.map[configMap.mouse.row][configMap.mouse.col] = configMap.mouse.swit;
     drawDisp();
+    uriAnchorManage();
   };
   //
   // --------------------onMouseClickCanvas----------------------end
@@ -1393,33 +1429,55 @@ main.model = (function(){
 
   // --------------------initModule----------------------start
   //
-  initModule = function($container, mode){
+  initModule = function($container, mode, stage, pass){
+
+    var duration = 0, _passMap = [];
+
+    configMap.stage.state.now_stage = stage;
+
     configMap.game_mode = mode;
     // メイン要素の描画
+    if(configMap.stage.state.now_stage === 0 && configMap.game_mode == 'game'){
+      duration = 1000;
+      configMap.stage.state.now_stage = 1;
+    }
     $container
       .html(configMap.main_html)
       .find("#header")
-        .animate({width: 100 + "%"}, 1000)
-        .animate({height: 50 + "px"}, 1000)
+        .animate({width: 100 + "%"}, duration)
+        .animate({height: 50 + "px"}, duration)
       .next() //Main
-        .animate({width: 100 + "%"}, 1000)
-        .animate({height: 500 + "px"}, 1000)
+        .animate({width: 100 + "%"}, duration)
+        .animate({height: 500 + "px"}, duration)
       .find("#main-disp-window") //Window
         .css("margin", (-configMap.disp_state.wid/2) + " 0 0 " + (-configMap.disp_state.wid/2) )
-        .animate({width: configMap.disp_state.wid + "px"}, 1000)
-        .animate({height: configMap.disp_state.hei + "px" }, 1000)
+        .animate({width: configMap.disp_state.wid + "px"}, duration)
+        .animate({height: configMap.disp_state.hei + "px" }, duration)
       .parents().find("#main-disp").next() //Footer
-        .animate({width: 100 + "%"}, 1000)
+        .animate({width: 100 + "%"}, duration)
         .css("bottom","0")
         .animate({height: 100 + "px" }, {
-          duration: "1000",
+          duration: duration,
           complete: function(){
             // エレメント取得
             mainCanvas = document.getElementById("main-disp-window");
             if(mode == 'game'){
               main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, 1);
-              gameStart();
+              if(pass == configMap.stage.map.toString(16) || pass == null)gameStart();
+              else return false;
             } else if(mode == 'edit'){
+
+              if(pass != null){
+                _passMap = pass.split(",");
+                for(var i = 0; i < configMap.stage.map.length ; i++){
+                  for(var j = 0; j < configMap.stage.map[i].length ; j++){
+                    configMap.stage.map[i][j] = _passMap[i*configMap.stage.map[i].length + j];
+
+                  }
+                }
+                drawDisp();
+              }
+              uriAnchorManage();
               $("#rad-range").remove();
               mainCanvas.addEventListener('mousemove', onMouseMoveCanvas, false);
               mainCanvas.addEventListener('mousedown', onMouseClickCanvas, false);
