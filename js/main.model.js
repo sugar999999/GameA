@@ -390,9 +390,9 @@ main.model = (function(){
         if(!configMap.ball_state.gram_burst){
           var _gram = configMap.ball_state.gram, gram = 0;
           configMap.ball_state.gram_burst = setInterval(function(){
+            if(configMap.ball_state.gram > 59.9)configMap.ball_state.gram = 59.9;
             configMap.ball_state.gram += .1;
             gram += .1;
-            if(configMap.ball_state.gram > 59.9)configMap.ball_state.gram = 60;
             if(gram > 20){
               clearInterval(configMap.ball_state.gram_burst);
               configMap.ball_state.gram_burst = setInterval(function(){
@@ -412,9 +412,9 @@ main.model = (function(){
         if(!configMap.ball_state.gram_burst){
           var _gram = configMap.ball_state.gram, gram = 0;
           configMap.ball_state.gram_burst = setInterval(function(){
+            if(configMap.ball_state.gram > 59.9)configMap.ball_state.gram = 59.9;
             configMap.ball_state.gram += .1;
             gram += .1;
-            if(configMap.ball_state.gram > 59.9)configMap.ball_state.gram = 60;
             if(gram > 40){
               clearInterval(configMap.ball_state.gram_burst);
               configMap.ball_state.gram_burst = setInterval(function(){
