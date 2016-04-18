@@ -10,7 +10,7 @@ main.model = (function(){
     main_html: String()
       + '<div id=\"header\">- SPIN MAZE RUNNER -<\/div>'
       + '<div id=\"main-disp\">'
-        + '<div id=\"main-disp-direction\">'
+        + '<div id=\"main-disp-direction\"><div id="nowStage"><\/div>'
         + '<\/div><canvas id=\"main-disp-window\"><\/canvas>'
         + '<input type=\"range\" id=\"rad-range\" max=\"270\" min=\"-270\" value=\"0\" step=\"1\"><\/input>'
         + '<div id=\"main-disp-status\"><\/div>'
@@ -121,7 +121,7 @@ main.model = (function(){
       vx: 0,
       vy: 0,
       radius: 7,
-      gram: 1.5,
+      gram: 0.5,
       powerX: 0,
       powerY: 0,
       rebound: 0.1,
@@ -172,12 +172,13 @@ main.model = (function(){
     configMap.ball_state.Y = (configMap.stage.start.row * configMap.block_size) + (configMap.block_size / 2);
     configMap.ball_state.col = Math.floor(configMap.ball_state.X / configMap.block_size);
     configMap.ball_state.row = Math.floor(configMap.ball_state.Y / configMap.block_size);
-    configMap.ball_state.gram = 1.5;
+    configMap.ball_state.gram = 0.5;
     configMap.ball_state.gravity = 9.8;
     configMap.ball_state.rebound = .1;
+    configMap.ball_state.radius = 7;
     configMap.stage.state.isStarting = {};
 
-    $("#main-disp").append("Stage " + configMap.stage.state.now_stage);
+    $("#nowStage").text("Stage " + configMap.stage.state.now_stage);
 
     $("#main")
       .append(configMap.stageStart_html)
@@ -218,38 +219,60 @@ main.model = (function(){
           if(configMap.disp_state.rad == 360 || configMap.disp_state.rad === 0)clearInterval(dispreset);
         }, 3);
     }
-    $("#main")
-      .append(configMap.goal_html)
-      .find("#goal-effect")
-      .text("Stage " + configMap.stage.state.now_stage +"\nCLEAR")
-      .animate({left: 50 + "%"}, 300);
-    $("#main-disp-window") //Window
-      .animate({height: 0 + "px"}, 1000)
-      .animate({width: 0 + "px" },{
-        duration: "0",
-        complete: function(){
-          configMap.stage.state.now_stage++;
-          main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, 1);
-          drawDisp();
-          $(this) //Window
-            .animate({width: configMap.disp_state.wid + "px"}, 0)
-            .animate({height: configMap.disp_state.hei + "px" },{
-              duration: "1000",
-              complete: function(){
-                $("#goal-effect")
-                  .animate({left: 150 + "%"}, {
-                    duration: "300",
-                    complete: function(){
-                      $(this).remove();
-                    }
-                  });
-                $("#main-disp").append('<input type=\"range\" id=\"rad-range\" max=\"' + configMap.disp_state.rad_max + '\" min=\"-' + configMap.disp_state.rad_max + '\" value=\"0\" step=\"' + configMap.disp_state.rad_range + '\"></input>');
-                gameStart();
-              }
-            });
 
-        }
-      });
+    if(configMap.stage.state.now_stage < 2){ // stage 数
+      $("#main")
+        .find("#goal-effect")
+        .text("Stage " + configMap.stage.state.now_stage +"\nCLEAR")
+        .animate({left: 50 + "%"}, 300);
+
+      $("#main-disp-window") //Window
+        .animate({height: 0 + "px"}, 1000)
+        .animate({width: 0 + "px" },{
+          duration: "0",
+          complete: function(){
+            configMap.stage.state.now_stage++;
+            main.stagelist.mapMake(configMap.stage, "_" + configMap.stage.state.now_stage, 1);
+            drawDisp();
+            $(this) //Window
+              .animate({width: configMap.disp_state.wid + "px"}, 0)
+              .animate({height: configMap.disp_state.hei + "px" },{
+                duration: "1000",
+                complete: function(){
+                  $("#goal-effect")
+                    .animate({left: 150 + "%"}, {
+                      duration: "300",
+                      complete: function(){
+                        $(this).remove();
+                      }
+                    });
+                  $("#main-disp").append('<input type=\"range\" id=\"rad-range\" max=\"' + configMap.disp_state.rad_max + '\" min=\"-' + configMap.disp_state.rad_max + '\" value=\"0\" step=\"' + configMap.disp_state.rad_range + '\"></input>');
+                  gameStart();
+                }
+              });
+
+          }
+        });
+    } else {
+      $("#main")
+        .find("#goal-effect")
+        .text("Stage " + configMap.stage.state.now_stage +"\nCLEAR")
+        .animate({left: 50 + "%"}, 300);
+
+      setTimeout(function(){
+        $("#main")
+          .find("#goal-effect")
+          .html("<span>Congraturations!<\/span>\nAll Stage CLEAR")
+          .animate({left: 50 + "%"}, 300);
+
+        //全クリ後、更新するとタイトル画面に戻る処理
+        //configmap.stage.state.allCrear = true;
+        //uriAnchorManage();
+      }, 2000);
+
+    }
+
+
   };
   //
   // -----------------------goal-------------------------end
@@ -434,41 +457,79 @@ main.model = (function(){
       // clinging
       } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -18){ // clinging
         if(!configMap.ball_state.isClinging){
-          configMap.ball_state.isClinging = true;
-          setTimeout(function(){ delete configMap.ball_state.isClinging; } ,15000);
+          configMap.ball_state.isClinging = setTimeout(function(){ delete configMap.ball_state.isClinging; } ,15000);
 
+        } else {
+          delete configMap.ball_state.isClinging;
+          configMap.ball_state.isClinging = setTimeout(function(){ delete configMap.ball_state.isClinging; } ,15000);
         }
 
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
 
       // jet
       } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -19){ // Right
+        clearInterval(configMap.ball_state.jet_right);
+        delete configMap.ball_state.jet_right;
         configMap.ball_state.jet_right = setInterval(function(){
           configMap.ball_state.speedX = 999;
           configMap.ball_state.speedY = 0;
-          configMap.ball_state.powerX = 5000 * configMap.ball_state.gram;
+          configMap.ball_state.powerX = 4000 * configMap.ball_state.gram;
         }, 1);
         setTimeout(function(){
           clearInterval(configMap.ball_state.jet_right);
           delete configMap.ball_state.jet_right;
-        }, 1000);
+        }, 2000);
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
 
       } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -20){ // left
+        clearInterval(configMap.ball_state.jet_left);
+        delete configMap.ball_state.jet_left;
         configMap.ball_state.jet_left = setInterval(function(){
           configMap.ball_state.speedX = -999;
           configMap.ball_state.speedY = 0;
-          configMap.ball_state.powerX = 5000 * configMap.ball_state.gram;
+          configMap.ball_state.powerX = 4000 * configMap.ball_state.gram;
         }, 1);
         setTimeout(function(){
           clearInterval(configMap.ball_state.jet_left);
           delete configMap.ball_state.jet_left;
-        }, 1000);
+        }, 2000);
         configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] = 0;
+
+
+
+    // Trap
+      } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -100){ // Right
+        clearInterval(configMap.ball_state.jet_right);
+        delete configMap.ball_state.jet_right;
+        configMap.ball_state.jet_right = setInterval(function(){
+          configMap.ball_state.speedX = 99;
+          configMap.ball_state.speedY = 0;
+          configMap.ball_state.powerX = 5000;
+        }, 1);
+        setTimeout(function(){
+          clearInterval(configMap.ball_state.jet_right);
+          delete configMap.ball_state.jet_right;
+        }, 1500);
+
+      } else if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state.col] == -101){ // left
+        clearInterval(configMap.ball_state.jet_left);
+        delete configMap.ball_state.jet_left;
+        configMap.ball_state.jet_left = setInterval(function(){
+          configMap.ball_state.speedX = -99;
+          configMap.ball_state.speedY = 0;
+          configMap.ball_state.powerX = 5000;
+        }, 1);
+        setTimeout(function(){
+          clearInterval(configMap.ball_state.jet_left);
+          delete configMap.ball_state.jet_left;
+        }, 1500);
       }
 
 
     }
+
+
+
 
 
     // ボールの位置更新
@@ -477,8 +538,10 @@ main.model = (function(){
     configMap.ball_state.vy = configMap.ball_state.Y;
 
     if(!configMap.ball_state.jumping){
-      configMap.ball_state.speedX += Math.sin(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
-      configMap.ball_state.speedY += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
+      if(!configMap.ball_state.jet_left && !configMap.ball_state.jet_right){
+        configMap.ball_state.speedX += Math.sin(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
+        configMap.ball_state.speedY += Math.cos(configMap.disp_state.rad * Math.PI / 180) * configMap.ball_state.gravity * .07;
+      }
     } else delete configMap.ball_state.jumping;
 
     if(configMap.ball_state.speedX >= configMap.block_size / 2)configMap.ball_state.speedX = configMap.block_size / 2;
@@ -564,7 +627,7 @@ main.model = (function(){
       //  45度よりY軸寄り　→　「vy」のみ殺す
       //
       if(configMap.ball_state._col > configMap.ball_state.col){ // right
-        if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] >= 1){
+        if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] >= 1 ){
           configMap.ball_state.vx = configMap.ball_state._col * configMap.block_size;
           configMap.ball_state.vx -= (Math.cos(i * Math.PI / 180) * (configMap.ball_state.radius));
 
@@ -573,7 +636,10 @@ main.model = (function(){
           // ブロック破壊判定　横
           if(configMap.ball_state._col != configMap.stage.map[configMap.ball_state.row].length-1){
             if(configMap.ball_state.powerX > configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col]*configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] * configMap.block_size){
-              configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] -= 1;
+              if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] -= 5;
+              } else configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] -= 1;
+
               if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] = 0;
             }
           }
@@ -602,7 +668,9 @@ main.model = (function(){
               // ブロック破壊判定　斜め
               if(configMap.ball_state._col != configMap.stage.map[configMap.ball_state.row].length-1){
                 if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size){
-                  configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                  if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                    configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 5;
+                  } else configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
                   if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
                 }
               }
@@ -625,7 +693,9 @@ main.model = (function(){
               // ブロック破壊判定　斜め
               if(configMap.ball_state._col != configMap.stage.map[configMap.ball_state.row].length-1){
                 if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180) )) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col]* configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size){
-                  configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                  if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                    configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 5;
+                  } else configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
                   if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
                 }
               }
@@ -643,7 +713,9 @@ main.model = (function(){
           // ブロック破壊判定　横
           if(configMap.ball_state._col !== 0){
             if(configMap.ball_state.powerX > configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] *configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] * configMap.block_size){
-              configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] -= 1;
+              if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] -= 5;
+              } else configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] -= 1;
               if(configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state.row][configMap.ball_state._col] = 0;
             }
           }
@@ -671,7 +743,9 @@ main.model = (function(){
               // ブロック破壊判定　斜め
               if(configMap.ball_state._col !== 0){
                 if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] *configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size){
-                  configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                  if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                    configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 5;
+                  } else configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
                   if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
                 }
               }
@@ -693,7 +767,9 @@ main.model = (function(){
               // ブロック破壊判定　斜め
               if(configMap.ball_state._col !== 0){
                 if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] *configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size){
-                  configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                  if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                    configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 5;
+                  } else configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
                   if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
                 }
               }
@@ -711,7 +787,9 @@ main.model = (function(){
           // ブロック破壊判定　縦
           if(configMap.ball_state._row != configMap.stage.map.length-1){
             if(configMap.ball_state.powerY > configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] * configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] * configMap.block_size){
-              configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] -= 1;
+              if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] -= 5;
+              } else configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] -= 1;
               if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] = 0;
             }
           }
@@ -739,7 +817,9 @@ main.model = (function(){
               // ブロック破壊判定　斜め
               if(configMap.ball_state._row != configMap.stage.map.length-1){
                 if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] *configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size){
-                  configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                  if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                    configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 5;
+                  } else configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
                   if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
                 }
               }
@@ -761,7 +841,9 @@ main.model = (function(){
               // ブロック破壊判定　斜め
               if(configMap.ball_state._row != configMap.stage.map.length-1){
                 if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] *configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size){
-                  configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                  if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                    configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 5;
+                  } else configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
                   if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
                 }
               }
@@ -779,7 +861,9 @@ main.model = (function(){
           // ブロック破壊判定　縦
           if(configMap.ball_state._row !== 0){
             if(configMap.ball_state.powerY > configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] *configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] * configMap.block_size){
-              configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] -= 1;
+              if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] -= 5;
+              } else configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] -= 1;
               if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state.col] = 0;
             }
           }
@@ -808,7 +892,9 @@ main.model = (function(){
               // ブロック破壊判定　斜め
               if(configMap.ball_state._row !== 0){
                 if(( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] *configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size){
-                  configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                  if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                    configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 5;
+                  } else configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
                   if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
                 }
               }
@@ -830,7 +916,9 @@ main.model = (function(){
               // ブロック破壊判定　斜め
               if(configMap.ball_state._row !== 0){
                 if( ( configMap.ball_state.powerX * (Math.cos(i * Math.PI / 180)) + configMap.ball_state.powerY * (Math.cos(i * Math.PI / 180)) ) > configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] *configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] * configMap.block_size){
-                  configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
+                  if(configMap.ball_state.jet_right || configMap.ball_state.jet_left){
+                    configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 5;
+                  } else configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] -= 1;
                   if(configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] < 0)configMap.stage.map[configMap.ball_state._row][configMap.ball_state._col] = 0;
                 }
               }
@@ -1207,10 +1295,12 @@ main.model = (function(){
     for(var i=0; i < configMap.stage.map.length; i++){
       for(var j=0; j < configMap.stage.map[i].length; j++){
 
-        if( configMap.stage.map[i][j] == 99){
+        if( configMap.stage.map[i][j] >= 10){
           mainCont.fillStyle = "#610";
 
-        }else{
+        }else if(configMap.stage.map[i][j] <= -100){
+          mainCont.fillStyle = "#500";
+        }else {
           mainCont.fillStyle = "#" //inner color
                               + ((11 - configMap.stage.map[i][j]).toString(16))
                               + ((3 - Math.floor(configMap.stage.map[i][j] / 3)).toString(16))
@@ -1218,12 +1308,14 @@ main.model = (function(){
         }
 
 
-        if(configMap.stage.map[i][j] >= 1){
+        if(configMap.stage.map[i][j] >= 1 || configMap.stage.map[i][j] <= -100){
           mainCont.lineWidth = 2;
           mainCont.lineJoin = "bavel";
           if((configMap.stage.map[i][j]) >= 7){ //frame color
             if( configMap.stage.map[i][j] == 99)mainCont.strokeStyle = "#300";
             else mainCont.strokeStyle = "#000";
+          } else if( configMap.stage.map[i][j] <= -100 ){
+            mainCont.strokeStyle = "transparent";
           } else {
             mainCont.strokeStyle = "#" + ((7 - (configMap.stage.map[i][j])).toString(16))
                                 + ((2 - Math.floor(configMap.stage.map[i][j] / 3)).toString(16))
@@ -1242,6 +1334,19 @@ main.model = (function(){
           else mainCont.moveTo((j * configMap.block_size), (i * configMap.block_size) + configMap.block_size);
           if(j > 0 && configMap.stage.map[i][j-1] != configMap.stage.map[i][j])mainCont.lineTo(j * configMap.block_size, i * configMap.block_size);
           mainCont.stroke();
+
+          if(configMap.stage.map[i][j] <= -100){
+            mainCont.lineWidth = 0.3;
+            mainCont.strokeStyle = "#fff";
+            mainCont.font = "100 15px/15px 'Helvetica'";
+            mainCont.textAlign = "center";
+            mainCont.textBaseline = "middle";
+            if(configMap.stage.map[i][j] == -100){
+              mainCont.strokeText(">>", j * configMap.block_size + configMap.block_size / 2, i * configMap.block_size + configMap.block_size / 2);
+            } else if(configMap.stage.map[i][j] == -101){
+              mainCont.strokeText("<<", j * configMap.block_size + configMap.block_size / 2, i * configMap.block_size + configMap.block_size / 2);
+            }
+          }
 
 
 
@@ -1690,6 +1795,7 @@ main.model = (function(){
     }
     $container
       .html(configMap.main_html)
+      .append(configMap.goal_html)
       .find("#header")
         .animate({width: 100 + "%"}, duration)
         .animate({height: 50 + "px"}, duration)
