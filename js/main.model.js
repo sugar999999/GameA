@@ -233,6 +233,7 @@ main.model = (function(){
 
     if(configMap.stage.state.now_stage < 3){ // stage 数
       $("#main")
+        .append(configMap.goal_html)
         .find("#goal-effect")
         .text("Stage " + configMap.stage.state.now_stage +"\nCLEAR")
         .animate({left: 50 + "%"}, 300);
@@ -256,7 +257,7 @@ main.model = (function(){
                       complete: function(){
                         $(this).remove();
                       }
-                    });
+                    })
                   $("#main-disp").append('<input type=\"range\" id=\"rad-range\" max=\"' + configMap.disp_state.rad_max + '\" min=\"-' + configMap.disp_state.rad_max + '\" value=\"0\" step=\"' + configMap.disp_state.rad_range + '\"></input>');
                   gameStart();
                 }
@@ -266,9 +267,10 @@ main.model = (function(){
         });
     } else {
       $("#main")
+        .append(configMap.goal_html)
         .find("#goal-effect")
         .text("Stage " + configMap.stage.state.now_stage +"\nCLEAR")
-        .animate({left: 50 + "%"}, 300);
+        .animate({left: 50 + "%"}, 300)
 
       setTimeout(function(){
         $("#main")
