@@ -142,21 +142,31 @@ main.model = (function(){
   //
   uriAnchorManage = function() {
 
-    main.start.changeAnchorSchema('mode', configMap.game_mode);
-    main.start.changeAnchorSchema('stage', configMap.stage.state.now_stage);
-    main.start.changeAnchorSchema('area', configMap.stage.state.now_area);
-    main.start.changeAnchorSchema('col', configMap.ball_state.col);
-    main.start.changeAnchorSchema('row', configMap.ball_state.row);
-    main.start.changeAnchorSchema('pass', configMap.stage.map.toString(16));
+    if(configMap.stage.state.allCrear){
+      main.start.changeAnchorSchema('mode', 'DELETE');
+      main.start.changeAnchorSchema('stage', 'DELETE');
+      main.start.changeAnchorSchema('area', 'DELETE');
+      main.start.changeAnchorSchema('col', 'DELETE');
+      main.start.changeAnchorSchema('row', 'DELETE');
+      main.start.changeAnchorSchema('pass', 'DELETE');
+      main.start.changeAnchorPart({});
+    }else{
+      main.start.changeAnchorSchema('mode', configMap.game_mode);
+      main.start.changeAnchorSchema('stage', configMap.stage.state.now_stage);
+      main.start.changeAnchorSchema('area', configMap.stage.state.now_area);
+      main.start.changeAnchorSchema('col', configMap.ball_state.col);
+      main.start.changeAnchorSchema('row', configMap.ball_state.row);
+      main.start.changeAnchorSchema('pass', configMap.stage.map.toString(16));
+      main.start.changeAnchorPart({
+        mode: configMap.game_mode,
+        stage: configMap.stage.state.now_stage,
+        area: configMap.stage.state.now_area,
+        col: configMap.ball_state.col,
+        row: configMap.ball_state.row,
+        pass: configMap.stage.map.toString(16)
+      });
+    }
 
-    main.start.changeAnchorPart({
-      mode: configMap.game_mode,
-      stage: configMap.stage.state.now_stage,
-      area: configMap.stage.state.now_area,
-      col: configMap.ball_state.col,
-      row: configMap.ball_state.row,
-      pass: configMap.stage.map.toString(16)
-    });
   };
   //
   // ------------------uriAnchorManage---------------end
@@ -166,6 +176,7 @@ main.model = (function(){
 
   gameStart = function(){
 
+    //status 初期化
     configMap.ball_state.speedX = 0;
     configMap.ball_state.speedY = 0;
     configMap.ball_state.X = (configMap.stage.start.col * configMap.block_size) + (configMap.block_size / 2);
@@ -220,7 +231,7 @@ main.model = (function(){
         }, 3);
     }
 
-    if(configMap.stage.state.now_stage < 2){ // stage 数
+    if(configMap.stage.state.now_stage < 3){ // stage 数
       $("#main")
         .find("#goal-effect")
         .text("Stage " + configMap.stage.state.now_stage +"\nCLEAR")
@@ -265,9 +276,12 @@ main.model = (function(){
           .html("<span>Congraturations!<\/span>\nAll Stage CLEAR")
           .animate({left: 50 + "%"}, 300);
 
-        //全クリ後、更新するとタイトル画面に戻る処理
-        //configmap.stage.state.allCrear = true;
-        //uriAnchorManage();
+        setTimeout(function(){
+          //全クリ後、更新するとタイトル画面に戻る処理
+          configMap.stage.state.allCrear = true;
+          uriAnchorManage();
+        }, 2000);
+
       }, 2000);
 
     }
@@ -473,7 +487,8 @@ main.model = (function(){
         configMap.ball_state.jet_right = setInterval(function(){
           configMap.ball_state.speedX = 999;
           configMap.ball_state.speedY = 0;
-          configMap.ball_state.powerX = 4000 * configMap.ball_state.gram;
+          if(configMap.ball_state.gram < 1)configMap.ball_state.powerX = 4000;
+          else configMap.ball_state.powerX = 4000 * configMap.ball_state.gram;
         }, 1);
         setTimeout(function(){
           clearInterval(configMap.ball_state.jet_right);
@@ -487,7 +502,8 @@ main.model = (function(){
         configMap.ball_state.jet_left = setInterval(function(){
           configMap.ball_state.speedX = -999;
           configMap.ball_state.speedY = 0;
-          configMap.ball_state.powerX = 4000 * configMap.ball_state.gram;
+          if(configMap.ball_state.gram < 1)configMap.ball_state.powerX = 4000;
+          else configMap.ball_state.powerX = 4000 * configMap.ball_state.gram;
         }, 1);
         setTimeout(function(){
           clearInterval(configMap.ball_state.jet_left);
@@ -664,6 +680,9 @@ main.model = (function(){
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
 
               }
+              if(configMap.ball_state.jet_right){
+                configMap.ball_state.vy += 2;
+              }
 
               // ブロック破壊判定　斜め
               if(configMap.ball_state._col != configMap.stage.map[configMap.ball_state.row].length-1){
@@ -688,6 +707,9 @@ main.model = (function(){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
 
+              }
+              if(configMap.ball_state.jet_right){
+                configMap.ball_state.vy -= 2;
               }
 
               // ブロック破壊判定　斜め
@@ -739,6 +761,9 @@ main.model = (function(){
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
 
               }
+              if(configMap.ball_state.jet_left){
+                configMap.ball_state.vy += 2;
+              }
 
               // ブロック破壊判定　斜め
               if(configMap.ball_state._col !== 0){
@@ -762,6 +787,9 @@ main.model = (function(){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
 
+              }
+              if(configMap.ball_state.jet_left){
+                configMap.ball_state.vy -= 2;
               }
 
               // ブロック破壊判定　斜め
@@ -813,6 +841,9 @@ main.model = (function(){
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
 
               }
+              if(configMap.ball_state.jet_right){
+                configMap.ball_state.vy -= 2;
+              }
 
               // ブロック破壊判定　斜め
               if(configMap.ball_state._row != configMap.stage.map.length-1){
@@ -836,6 +867,9 @@ main.model = (function(){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
 
+              }
+              if(configMap.ball_state.jet_left){
+                configMap.ball_state.vy -= 2;
               }
 
               // ブロック破壊判定　斜め
@@ -888,6 +922,9 @@ main.model = (function(){
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
 
               }
+              if(configMap.ball_state.jet_right){
+                configMap.ball_state.vy += 2;
+              }
 
               // ブロック破壊判定　斜め
               if(configMap.ball_state._row !== 0){
@@ -911,6 +948,9 @@ main.model = (function(){
                 configMap.ball_state.vy = configMap.ball_state._row * configMap.block_size + configMap.block_size;
                 configMap.ball_state.vy -= (Math.sin(i * Math.PI / 180) * configMap.ball_state.radius);
 
+              }
+              if(configMap.ball_state.jet_left){
+                configMap.ball_state.vy += 2;
               }
 
               // ブロック破壊判定　斜め
@@ -1742,8 +1782,8 @@ main.model = (function(){
       // 例外：クリックされたまま他のブロックに移った場合、最初のブロック状態の判定から変更しない。
       //  * configMap.mouse.swit：クリック時の動作。「0」消す。「1」埋める。
       //
-      if(e.buttons === 0 && configMap.stage.map[configMap.mouse.row][configMap.mouse.col] === 0)configMap.mouse.swit = 1;
-      else if(e.buttons === 0 && configMap.stage.map[configMap.mouse.row][configMap.mouse.col] == 1)configMap.mouse.swit = 0;
+      if(e.buttons === 0 && configMap.stage.map[configMap.mouse.row][configMap.mouse.col] === 0)configMap.mouse.swit = 99;
+      else if(e.buttons === 0 && configMap.stage.map[configMap.mouse.row][configMap.mouse.col] == 99)configMap.mouse.swit = 0;
 
       // クリック時の動作
       //「configMap.mouse.swit」を現在位置ブロックに代入する。

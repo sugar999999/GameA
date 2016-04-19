@@ -27,8 +27,10 @@ main.start = (function(){
     //
     changeAnchorSchema = function( name, val ){
       delete configMap.anchor_schema_map[name];
-      configMap.anchor_schema_map[name] = {};
-      configMap.anchor_schema_map[name][val] = true;
+      if(val != 'DELETE'){
+        configMap.anchor_schema_map[name] = {};
+        configMap.anchor_schema_map[name][val] = true;
+      }
 
       $.uriAnchor.configModule({
         schema_map : configMap.anchor_schema_map
@@ -44,11 +46,12 @@ main.start = (function(){
       var
         anchor_map_revise = copyAnchorMap(),
         bool_return = true,
-        key_name, key_name_dep;
+        key_name, key_name_dep, i = 0;
 
         KEYVAL:
         for ( key_name in arg_map ){
           if ( arg_map.hasOwnProperty( key_name ) ) {
+            i++;
             if ( key_name.indexOf( '_' ) === 0 ) { continue KEYVAL; }
 
             anchor_map_revise[key_name] = arg_map[key_name];
@@ -63,14 +66,19 @@ main.start = (function(){
             }
           }
         }
+        if(i === 0){
+          $.uriAnchor.setAnchor( {}, null, true );
+        }else{
+          try{
+            $.uriAnchor.setAnchor( anchor_map_revise );
+          }
+          catch ( error ){
+            $.uriAnchor.setAnchor( stateMap.anchor_map, null, true );
+            bool_return = false;
+          }
+        }
 
-        try{
-          $.uriAnchor.setAnchor( anchor_map_revise );
-        }
-        catch ( error ){
-          $.uriAnchor.setAnchor( stateMap.anchor_map, null, true );
-          bool_return = false;
-        }
+
 
         return bool_return;
     };
