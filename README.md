@@ -1,2 +1,3 @@
-# GameA
-Game A testing
+# SPIN MAZE RUNNER
+パズルゲーム
+360度回転するダンジョンを操作してゴールを目指せ！
