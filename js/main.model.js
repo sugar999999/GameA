@@ -13,7 +13,7 @@ main.model = (function(){
         + '<div id=\"main-disp-direction\"><div id="nowStage"><\/div>'
         + '<\/div><canvas id=\"main-disp-window\"><\/canvas>'
         + '<input type=\"range\" id=\"rad-range\" max=\"270\" min=\"-270\" value=\"0\" step=\"1\"><\/input>'
-        + '<div id=\"main-disp-status\"><\/div>'
+        //+ '<div id=\"main-disp-status\"><\/div>'
       + '<\/div>'
       + '<div id=\"footer\">(C) 2016 Sugar999<br><a href="ReadMe.html"> READ ME </a><\/div>'
       + '<div id=\"nav\">Nav'
