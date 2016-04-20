@@ -1,0 +1,152 @@
+/* ReadMe.css
+ * by sugar999999
+ */
+
+body {
+  width: 100%;
+  height: 100%;
+  background: #200;
+  font: 500 20px/20px Impact;
+  color: #ddd;
+}
+
+
+img {
+  border: 1px #ddd solid;
+  border-radius: 5px;
+}
+
+#title, .header{
+  color: #a00;
+  text-shadow:
+   -2px -2px #fff,
+   2px -2px #fff,
+   -2px 2px #fff,
+   2px 2px #fff;
+}
+
+#title{
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin: 50px 0 50px -200px;
+  z-index: 5;
+  width: 400px;
+  height: 100px;
+  text-align: center;
+  font: 300 50px/50px 'Impact';
+  color: #a00;
+
+}
+
+#title div{
+  position: absolute;
+  width: 150px;
+  bottom: 15px;
+  left: 125px;
+  font-size: .8em;
+  color: #a30;
+  transform: rotate(-5deg);
+
+}
+
+#menu{
+  position: absolute;
+  top: 150px;
+  right: -5px;
+  bottom: -5px;
+  width: 250px;
+  height: auto;
+  border: 2px #ddd solid;
+  border-radius: 5px;
+  background: #920;
+  z-index: 2;
+}
+
+#content{
+  position: absolute;
+  left: -5px;
+  top: 155px;
+  right: 245px;
+  bottom: -5px;
+  width: auto;
+  height: auto;
+  border: 2px #ddd solid;
+  border-radius: 5px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#menu-mokuteki {
+  position: absolute;
+  left: 10px;
+  top: 40px;
+}
+
+#menu-sousa {
+  position: absolute;
+  left: 10px;
+  top: 85px;
+}
+
+#menu-item {
+  position: absolute;
+  left: 10px;
+  top: 130px;
+}
+
+#content-main {
+  position:absolute;
+  right: 0px;
+  top: 70px;
+  width: 92%;
+  font: 500 15px/20px 'HGSｺﾞｼｯｸE';
+}
+
+#content-main p{
+  position: relative;
+  left: 10px;
+  top: -20px;
+  width:90%;
+  text-indent: 1em;
+  font-size: .9em;
+}
+
+#credit {
+  position: absolute;
+  left: 0;
+  bottom: 5%;
+  width: 100%;
+  text-align: center;
+  font: 500 15px/15px 'HGSｺﾞｼｯｸE';
+}
+table td{
+  font: 500 15px/20px 'HGSｺﾞｼｯｸE';
+  height: 50px;
+  width: 200px;
+  vertical-align: bottom;
+}
+
+h1 {
+  font-size: 1.2em;
+}
+
+
+.menu{
+  margin: 10px 10px 10px 10px;
+  font: 800 25px/25px 'HGSｺﾞｼｯｸE';
+}
+
+.menu:hover{
+  cursor: pointer;
+  color: #000;
+}
+
+.header {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 100%;
+  margin: 5px 0 10px 5px;
+  font-size: 1.2em;
+}

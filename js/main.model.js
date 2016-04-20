@@ -15,7 +15,7 @@ main.model = (function(){
         + '<input type=\"range\" id=\"rad-range\" max=\"270\" min=\"-270\" value=\"0\" step=\"1\"><\/input>'
         + '<div id=\"main-disp-status\"><\/div>'
       + '<\/div>'
-      + '<div id=\"footer\">Copyright by Sugar999<\/div>'
+      + '<div id=\"footer\">(C) 2016 Sugar999<br><a href="ReadMe.html"> READ ME </a><\/div>'
       + '<div id=\"nav\">Nav'
         + '<div id=\"output-map\"> << </div>'
         // testplaytools-------------------------start
@@ -1074,16 +1074,16 @@ main.model = (function(){
 
 
     //status 表示
-    $("#main-disp-status")
-      .html('<span>Weight: <\/span>' + configMap.ball_state.gram + '<br>')
-      .append('<span>X: <\/span>' + Math.floor(configMap.ball_state.X) + '<br>')
-      .append('<span>Y: <\/span>' + Math.floor(configMap.ball_state.Y) + '<br>')
-      .append('<span>col: <\/span>' + configMap.ball_state.col + '<br>')
-      .append('<span>row: <\/span>' + configMap.ball_state.row + '<br>')
-      .append('<span>dispRad: <\/span>' + configMap.disp_state.rad + '<br>')
-      .append('<span>dispPower: <\/span>' + configMap.disp_state.power + '<br>')
-      .append('<span>isJumping: <\/span>' + configMap.ball_state.jumping + '<br>')
-      .append('<span>isOnWall: <\/span>' + configMap.ball_state.isOnWall.toString() + '<br>');
+    //$("#main-disp-status")
+    //  .html('<span>Weight: <\/span>' + configMap.ball_state.gram + '<br>')
+    //  .append('<span>X: <\/span>' + Math.floor(configMap.ball_state.X) + '<br>')
+    //  .append('<span>Y: <\/span>' + Math.floor(configMap.ball_state.Y) + '<br>')
+    //  .append('<span>col: <\/span>' + configMap.ball_state.col + '<br>')
+    //  .append('<span>row: <\/span>' + configMap.ball_state.row + '<br>')
+    //  .append('<span>dispRad: <\/span>' + configMap.disp_state.rad + '<br>')
+    //  .append('<span>dispPower: <\/span>' + configMap.disp_state.power + '<br>')
+    //  .append('<span>isJumping: <\/span>' + configMap.ball_state.jumping + '<br>')
+    //  .append('<span>isOnWall: <\/span>' + configMap.ball_state.isOnWall.toString() + '<br>');
 
     //Reset
     for(var i = 0; i < 4; i++)configMap.ball_state.isOnWall[i] = false;
@@ -1724,7 +1724,7 @@ main.model = (function(){
 
     //draw status
     $("#header")
-      .html('<span>≪|</span>:' + Math.floor(configMap.ball_state.rebound*10*100)/100 + '%, <span>G↓</span> x' + Math.floor(configMap.ball_state.gravity/9.8 * 100) + '%, <span>kg</span>:' + Math.floor(configMap.ball_state.gram * 10)/10 +'kg');
+      .html('<span>≪|</span>:' + Math.round(configMap.ball_state.rebound*100) + '%, <span>G↓</span> x' + Math.floor(configMap.ball_state.gravity/9.8 * 100) + '%, <span>kg</span>:' + Math.floor(configMap.ball_state.gram * 10)/10 +'kg');
 
 
   };
