@@ -1845,7 +1845,7 @@ main.model = (function(){
         .animate({width: 100 + "%"}, duration)
         .animate({height: 500 + "px"}, duration)
       .find("#main-disp-window") //Window
-        .css("margin", (-configMap.disp_state.wid/2) + " 0 0 " + (-configMap.disp_state.wid/2) )
+        .css("margin", (-configMap.disp_state.wid/2) + "px 0px 0px " + (-configMap.disp_state.wid/2) + "px" )
         .animate({width: configMap.disp_state.wid + "px"}, duration)
         .animate({height: configMap.disp_state.hei + "px" }, duration)
       .parents().find("#main-disp").next() //Footer
