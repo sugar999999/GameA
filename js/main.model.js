@@ -16,26 +16,26 @@ main.model = (function(){
         //+ '<div id=\"main-disp-status\"><\/div>'
       + '<\/div>'
       + '<div id=\"footer\">(C) 2016 Sugar999<br><a href="ReadMe.html"> READ ME </a><\/div>'
-      + '<div id=\"nav\">Nav'
-        + '<div id=\"output-map\"> << </div>'
-        // testplaytools-------------------------start
-        + '<div id=\"gram-range\">gram: '
-          + '<textarea id=\"output-gram\" rows=\"1\" cols=\"3\">1.5<\/textarea>'
-          + '<input type=\"range\" id=\"_gram-range\" max=\"60" min=\"1\" step=\"0.1\" value=\"1.5\"><\/input>'
-        + '<\/div>'
-        + '<div id=\"rebound-range\">reb: '
-          + '<textarea id=\"output-rebound\" rows=\"1\" cols=\"3\">0<\/textarea>'
-          + '<input type=\"range\" id=\"_rebound-range\" max=\"2.0" min=\"0\" step=\"0.1\" value=\"0\"><\/input>'
-        + '<\/div>'
-        + '<div id=\"disp-rad-range\">rad-range: '
-          + '<textarea id=\"output-rad-range\" rows=\"1\" cols=\"3\">1<\/textarea>'
-          + '<input type=\"range\" id=\"_rad-range\" max=\"90" min=\"1\" step=\"1\" value=\"1\"><\/input>'
-        + '<\/div>'
-        + '<div id=\"disp-rad-max-range\">rad-max: '
-          + '<textarea id=\"output-rad-max\" rows=\"1\" cols=\"3\">270<\/textarea>'
-          + '<input type=\"range\" id=\"_rad-max\" max=\"360" min=\"135\" step=\"45\" value=\"270\"><\/input>'
-          + 'turnMode: <input type=\"checkbox\" id=\"_turnMode\"><\/input>'
-        + '<\/div>'
+  //    + '<div id=\"nav\">Nav'
+  //      + '<div id=\"output-map\"> << </div>'
+  //      // testplaytools-------------------------start
+  //      + '<div id=\"gram-range\">gram: '
+  //        + '<textarea id=\"output-gram\" rows=\"1\" cols=\"3\">1.5<\/textarea>'
+  //        + '<input type=\"range\" id=\"_gram-range\" max=\"60" min=\"1\" step=\"0.1\" value=\"1.5\"><\/input>'
+  //      + '<\/div>'
+  //      + '<div id=\"rebound-range\">reb: '
+  //        + '<textarea id=\"output-rebound\" rows=\"1\" cols=\"3\">0<\/textarea>'
+  //        + '<input type=\"range\" id=\"_rebound-range\" max=\"2.0" min=\"0\" step=\"0.1\" value=\"0\"><\/input>'
+  //      + '<\/div>'
+  //      + '<div id=\"disp-rad-range\">rad-range: '
+  //        + '<textarea id=\"output-rad-range\" rows=\"1\" cols=\"3\">1<\/textarea>'
+  //        + '<input type=\"range\" id=\"_rad-range\" max=\"90" min=\"1\" step=\"1\" value=\"1\"><\/input>'
+  //      + '<\/div>'
+  //      + '<div id=\"disp-rad-max-range\">rad-max: '
+  //        + '<textarea id=\"output-rad-max\" rows=\"1\" cols=\"3\">270<\/textarea>'
+  //        + '<input type=\"range\" id=\"_rad-max\" max=\"360" min=\"135\" step=\"45\" value=\"270\"><\/input>'
+  //        + 'turnMode: <input type=\"checkbox\" id=\"_turnMode\"><\/input>'
+  //      + '<\/div>'
         // testplaytools-------------------------end
       + '<\/div>',
 
@@ -1074,16 +1074,16 @@ main.model = (function(){
 
 
     //status 表示
-    //$("#main-disp-status")
-    //  .html('<span>Weight: <\/span>' + configMap.ball_state.gram + '<br>')
-    //  .append('<span>X: <\/span>' + Math.floor(configMap.ball_state.X) + '<br>')
-    //  .append('<span>Y: <\/span>' + Math.floor(configMap.ball_state.Y) + '<br>')
-    //  .append('<span>col: <\/span>' + configMap.ball_state.col + '<br>')
-    //  .append('<span>row: <\/span>' + configMap.ball_state.row + '<br>')
-    //  .append('<span>dispRad: <\/span>' + configMap.disp_state.rad + '<br>')
-    //  .append('<span>dispPower: <\/span>' + configMap.disp_state.power + '<br>')
-    //  .append('<span>isJumping: <\/span>' + configMap.ball_state.jumping + '<br>')
-    //  .append('<span>isOnWall: <\/span>' + configMap.ball_state.isOnWall.toString() + '<br>');
+  //  $("#main-disp-status")
+  //    .html('<span>Weight: <\/span>' + configMap.ball_state.gram + '<br>')
+  //    .append('<span>X: <\/span>' + Math.floor(configMap.ball_state.X) + '<br>')
+  //    .append('<span>Y: <\/span>' + Math.floor(configMap.ball_state.Y) + '<br>')
+  //    .append('<span>col: <\/span>' + configMap.ball_state.col + '<br>')
+  //    .append('<span>row: <\/span>' + configMap.ball_state.row + '<br>')
+  //    .append('<span>dispRad: <\/span>' + configMap.disp_state.rad + '<br>')
+  //    .append('<span>dispPower: <\/span>' + configMap.disp_state.power + '<br>')
+  //    .append('<span>isJumping: <\/span>' + configMap.ball_state.jumping + '<br>')
+  //    .append('<span>isOnWall: <\/span>' + configMap.ball_state.isOnWall.toString() + '<br>');
 
     //Reset
     for(var i = 0; i < 4; i++)configMap.ball_state.isOnWall[i] = false;

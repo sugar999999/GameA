@@ -137,13 +137,13 @@ main.start = (function(){
           complete: function(){
             $(this)
               .next()
-              .html('<span id=\"game\">GAME START<\/span><br><span id=\"edit\">EDIT MODE<\/span>')
+              .html('<span id=\"game\">GAME START<\/span>')//<br><span id=\"edit\">EDIT MODE<\/span>
               .find("#game")
               .bind('click', gameMode)
-              .next().next()
-              .bind('click', editMode)
+              //.next().next()
+              //.bind('click', editMode)
               .parent()
-              .css("height", "200px");
+              .css("height", "100px");//200px
 
           }});
     } else {
