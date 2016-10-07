@@ -1,0 +1,16 @@
+{
+  "name": "SPIN MAZE RUNNER",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "node index.js"
+  },
+
+  "engine": {
+    "node": "v6.2.1",
+    "npm": "3.9.3"
+  },
+  "dependencies": {
+    "serve-static": "1.11.1",
+    "connect": "3.5.0"
+  }
+}
